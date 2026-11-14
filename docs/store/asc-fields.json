@@ -1,0 +1,127 @@
+{
+  "locale": "en-US",
+  "bundleId": "com.samayvashsht.momentumwomen",
+  "ascAppId": "6834676214",
+  "version": "1.0.0",
+  "buildNumber": "2",
+  "supportsTablet": false,
+  "name": "Momentum – Women's Workout",
+  "nameLength": 26,
+  "subtitle": "Home and gym workout plans",
+  "subtitleLength": 26,
+  "promotionalText": "Guided sessions for home or the gym, with a timer or a rep counter and form cues. The beginner plan is free. Pro adds the Full Body and Upper Body plans.",
+  "promotionalTextLength": 153,
+  "description": "Momentum – Women's Workout is a training app for guided sessions on iPhone, at home or in the gym.\n\nToday opens on the next session, with the length and the exercise count, and a week view of workouts saved on this iPhone. Each move has a short form cue and a still. Train with a timer or a rep counter, and see the next move before you continue.\n\nThe beginner plan, the workout player, the library, and progress are free. Momentum Pro adds the Full Body and Upper Body plans.\n\nDownload is free. Momentum Pro is optional:\n- $2.99 per month, with a 7-day free trial\n- $19.99 per year, with a 7-day free trial\n- $39.99 for lifetime access, a one-time purchase with no trial\n\nPrices in the app are the App Store price for your storefront. Cancel a subscription at least 24 hours before the trial or the period ends if you do not want it to renew. Manage or cancel in your Apple ID settings.\n\nThe app is a general training tool. It does not offer medical, diet, or weight-loss advice.",
+  "descriptionLength": 980,
+  "keywords": "fitness,gym,training,exercise,strength,timer,reps,home,plans,glutes",
+  "keywordsLength": 67,
+  "whatsNew": "First release. Today view, guided workouts with a timer or reps, on-device progress, and optional Momentum Pro.",
+  "supportUrl": "https://samayhuf-star.github.io/app-legal/momentum-women/support.html",
+  "marketingUrl": "https://samayhuf-star.github.io/app-legal/momentum-women/support.html",
+  "marketingUrlNote": "No separate marketing page is published. The support URL returned HTTP 200 on 14 Nov 2026. https://samayhuf-star.github.io/app-legal/momentum-women/ returned 404.",
+  "privacyPolicyUrl": "https://samayhuf-star.github.io/app-legal/momentum-women/privacy.html",
+  "termsUrl": "https://samayhuf-star.github.io/app-legal/momentum-women/terms.html",
+  "primaryCategory": "HEALTH_AND_FITNESS",
+  "secondaryCategory": "LIFESTYLE",
+  "copyright": "2026 Samay Vashsht",
+  "ageRating": {
+    "rating": "4+",
+    "cartoonOrFantasyViolence": "NONE",
+    "realisticViolence": "NONE",
+    "prolongedGraphicOrSadisticRealisticViolence": "NONE",
+    "profanityOrCrudeHumor": "NONE",
+    "matureOrSuggestiveThemes": "NONE",
+    "horrorOrFearThemes": "NONE",
+    "medicalOrTreatmentInformation": "NONE",
+    "alcoholTobaccoOrDrugUseOrReferences": "NONE",
+    "simulatedGambling": "NONE",
+    "sexualContentOrNudity": "NONE",
+    "graphicSexualContentAndNudity": "NONE",
+    "gunsOrOtherWeapons": "NONE",
+    "contests": "NONE",
+    "unrestrictedWebAccess": false,
+    "gambling": false,
+    "userGeneratedContent": false,
+    "messagingAndChat": false,
+    "advertising": false
+  },
+  "reviewNotes": "# Guideline 2.1 notes — Momentum – Women's Workout (build 2)\n\nDraft for App Review. The binary to review is the one with `ios.buildNumber` 2 and `supportsTablet` false. No account password is required. Do not paste until that binary is the one under review.\n\n## 1. What the app is\n\nMomentum – Women's Workout is a training app for guided sessions on iPhone. A session uses a timer or a rep counter. Each move has a short form cue and a still. It is a general training tool. It does not diagnose, treat, or prevent any condition, and it does not give medical, diet, or weight-loss advice. Download is free (US $0.00).\n\n## 2. How to move through the app\n\nNo account and no login. There is no email field, no password, and no demo account.\n\n1. Launch the app. On first open, tap **Continue as Guest**. Progress stays on the device.\n2. **Today** shows a Day card for Beginner Strength, with the length and the exercise count. **Start** is the main button. Under it are this week and the last 30 days, from sessions finished on this iPhone.\n3. **Pro** is the small pill at the top of Today. It opens the paywall. It is not required to start the beginner session.\n4. **Plans** lists Beginner Strength (free, one session), Full Body, and Upper Body. The two paid plans show a Pro badge. Tapping a locked plan opens the paywall. Tapping the free plan opens the workout.\n5. **Workouts** is the exercise library. Tap a row to open that move.\n6. The workout player shows \"Exercise X of Y\", time left in the session, a progress bar, the form cue, the still, and the next move. **Start** and **Pause** are the large control. **Previous** and **Next** sit beside it. **Finish** on the last move saves the session on the device. **Close** leaves without that save.\n7. **Progress** shows the day streak, workout count, minutes from finished sessions, this week, and recent dates. The line under the title is \"Track your strength and consistency\".\n8. **Profile** shows Guest mode. **Log Out** only clears the on-device guest flag and returns to Continue as Guest. It is not an account.\n\n## 3. Where the paywall and Restore are\n\nThe app is not a hard paywall. Beginner Strength, the workout player, the library, and Progress stay available without a purchase.\n\nOpen the paywall from any of these:\n\n- The **Pro** pill on Today\n- **Unlock Momentum Pro** on Profile\n- **Full Body** or **Upper Body** on Plans, while Pro is not active\n\nThe paywall has **Close**. Offers load from StoreKit. **Restore purchases** is under the offers. **Terms**, **Privacy**, and the Apple standard EULA are links at the bottom.\n\n## 4. Products\n\nSold only through Apple In-App Purchase (StoreKit 2). US prices:\n\n- `com.samayvashsht.momentumwomen.monthly` — $2.99 per month, 7-day free trial for an eligible new subscriber. Display name: Momentum Women Monthly.\n- `com.samayvashsht.momentumwomen.yearly` — $19.99 per year, 7-day free trial for an eligible new subscriber. Display name: Momentum Women Yearly.\n- `com.samayvashsht.momentumwomen.lifetime` — $39.99 one-time, no trial. Display name: Momentum Women Lifetime.\n\nAfter a trial, the subscription starts unless it is cancelled at least 24 hours before the trial ends. Lifetime does not renew. The price on screen is the storefront price. When the store reports a trial, the subscription line includes the trial. Lifetime never shows a trial.\n\nPro unlocks the Full Body and Upper Body plans.\n\nReview images of this paywall, with those US prices filled in for a machine that cannot load StoreKit, are in `docs/store/screenshots/iap-review/`.\n\n## 5. What leaves the device\n\nPurchases go through Apple. Workout history is stored on the device and is not uploaded to a server of ours. There is no account service of ours. Privacy and Terms open in the browser. This version does not read or write Apple Health.\n\nPrivacy: https://samayhuf-star.github.io/app-legal/momentum-women/privacy.html\n\nTerms: https://samayhuf-star.github.io/app-legal/momentum-women/terms.html\n\nSupport: https://samayhuf-star.github.io/app-legal/momentum-women/support.html\n\nContact: Samay Vashsht, samayhuf@gmail.com.\n",
+  "reviewContact": {
+    "firstName": "Samay",
+    "lastName": "Vashsht",
+    "email": "samayhuf@gmail.com",
+    "phone": null,
+    "demoAccountRequired": false
+  },
+  "screenshots": {
+    "iphone69_1290x2796": [
+      "docs/store/screenshots/ios-6.9/01-today.png",
+      "docs/store/screenshots/ios-6.9/02-plans.png",
+      "docs/store/screenshots/ios-6.9/03-workout.png",
+      "docs/store/screenshots/ios-6.9/04-progress.png",
+      "docs/store/screenshots/ios-6.9/05-exercise.png"
+    ],
+    "iphone65_1284x2778": [
+      "docs/store/screenshots/ios-6.5/01-today.png",
+      "docs/store/screenshots/ios-6.5/02-plans.png",
+      "docs/store/screenshots/ios-6.5/03-workout.png",
+      "docs/store/screenshots/ios-6.5/04-progress.png",
+      "docs/store/screenshots/ios-6.5/05-exercise.png"
+    ],
+    "iapReview_1290x2796": [
+      "docs/store/screenshots/iap-review/paywall.png",
+      "docs/store/screenshots/iap-review/paywall-monthly.png",
+      "docs/store/screenshots/iap-review/paywall-yearly.png",
+      "docs/store/screenshots/iap-review/paywall-lifetime.png"
+    ]
+  },
+  "inAppPurchases": [
+    {
+      "productId": "com.samayvashsht.momentumwomen.monthly",
+      "type": "auto_renewable_subscription",
+      "displayName": "Momentum Women Monthly",
+      "description": "Momentum Pro monthly",
+      "priceUsd": "2.99",
+      "subscriptionPeriod": "P1M",
+      "introductoryOffer": {
+        "type": "free_trial",
+        "period": "P1W",
+        "eligibleNewSubscribers": true
+      },
+      "reviewScreenshot": "docs/store/screenshots/iap-review/paywall-monthly.png"
+    },
+    {
+      "productId": "com.samayvashsht.momentumwomen.yearly",
+      "type": "auto_renewable_subscription",
+      "displayName": "Momentum Women Yearly",
+      "description": "Momentum Pro yearly",
+      "priceUsd": "19.99",
+      "subscriptionPeriod": "P1Y",
+      "introductoryOffer": {
+        "type": "free_trial",
+        "period": "P1W",
+        "eligibleNewSubscribers": true
+      },
+      "reviewScreenshot": "docs/store/screenshots/iap-review/paywall-yearly.png"
+    },
+    {
+      "productId": "com.samayvashsht.momentumwomen.lifetime",
+      "type": "non_consumable",
+      "displayName": "Momentum Women Lifetime",
+      "description": "Lifetime Momentum Pro, no trial",
+      "priceUsd": "39.99",
+      "subscriptionPeriod": null,
+      "introductoryOffer": null,
+      "reviewScreenshot": "docs/store/screenshots/iap-review/paywall-lifetime.png"
+    }
+  ],
+  "downloadPriceUsd": "0.00",
+  "subscriptionGroupName": "Momentum Women Pro",
+  "urlChecks": {
+    "checkedOn": "2026-11-14",
+    "privacyPolicyUrl": 200,
+    "supportUrl": 200,
+    "termsUrl": 200,
+    "marketingUrl": 200
+  }
+}
