@@ -83,4 +83,4 @@ One copy detail, not a price mismatch: `ctaText` says "7 days free" whenever `tr
 
 Five frames at 1290 × 2796 in `docs/store/screenshots/ios-6.9/`. See `docs/store/screenshots/README.md`.
 
-`ios.supportsTablet` is still `true` in `app.json`. This set is iPhone 6.9" only. An iPad set is still required unless tablet support is turned off before submission. That choice is Samay's. This draft does not change `app.json`.
+`release/build2` sets `ios.supportsTablet` to `false` and `ios.buildNumber` to `2`. This set is the iPhone 6.9" set. An iPad set is not required for that build. This branch does not change `app.json`.

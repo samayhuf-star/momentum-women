@@ -48,8 +48,8 @@ Legend: **PASS** checked here. **FAIL** a real gap. **DEVICE** needs an iOS Simu
 | 30 | Simulator flow: guest, home, workout, exercise detail, paywall, Restore | DEVICE for a new run. Prior run passed | This machine cannot boot an iOS Simulator. Web covered guest, home, workout, exercise detail, plans, and progress (screenshots in `docs/store/screenshots/ios-6.9/`). Paywall and Restore need StoreKit. Prior pass: [iOS Simulator QA 43585260629](https://github.com/AI-Samay/sim-qa-runner/actions/runs/43585260629), job "Simulator QA (samayhuf-star/momentum-women@1e48e20)", `macos-latest`, conclusion success, 14 Nov 2026 10:26–10:55 UTC. That job's steps include "Run flow" success. |
 | 31 | Workout-complete alert dismisses the player | DEVICE | On iOS, `Alert.alert` in `app/workout/[id].tsx` asks the reviewer to tap OK, then `router.back()`. react-native-web's `Alert.alert` is an empty function, so web saved progress and stayed on the player until Close. Confirm the alert on a simulator or on build 1. |
 | 32 | Safe area and status bar | DEVICE | Screens use `SafeAreaView`. Web insets are 0, so the new screenshots have no status bar. The older sim frames in `docs/sim-screenshots/` are 1206 × 2622 and do show a status bar. They are the wrong size for the 6.9" slot and `03-paywall.png` is not listing art. |
-| 33 | iPad screenshots, because `supportsTablet` is true | FAIL until Samay decides | `app.json` `ios.supportsTablet` is `true`. The launch plan said to set it false for v1 or to supply an iPad set. This task produced the 6.9" iPhone set only. Submitting with tablet support and no iPad screenshots will be rejected for missing media. Not changed here. |
-| 34 | README still says unmatched exercises use a placeholder | FAIL, docs only | `README.md` says "Unmatched exercises use a neutral placeholder." `LICENSE-SOURCES.md` and the code disagree: unmatched moves are `hidden: true`, and no placeholder file ships. The letter badge in `ExerciseMedia` is only a fallback if a visible id has no still. All 46 visible ids have stills. Not a binary bug. Not edited in this pass. |
+| 33 | iPad screenshots, because `supportsTablet` is true on build 1 | FIXED on build 2, not in this branch | Build 1's `app.json` has `supportsTablet: true`. `release/build2` sets it to `false` and `buildNumber` to `2`. This listing set stays iPhone 6.9" only. No iPad set is required once that change ships. |
+| 34 | README still says unmatched exercises use a placeholder | FIXED on build 2, not in this branch | On build 1, `README.md` says unmatched exercises use a neutral placeholder. `release/build2` replaces that sentence. Unmatched moves are hidden. `LICENSE-SOURCES.md` lists the 88 stills that ship, including one CC BY-SA photograph (Pilates Hundred by Helisusa). |
 
 ## GitHub Actions macOS runners
 
@@ -70,5 +70,8 @@ The 12 Nov audit in `docs/store/workout-apps-audit-2026-11-12.md` says a billing
 - Paywall offers, localized prices, the 7-day trial line, and Restore against StoreKit.
 - The "Workout complete" alert and the return to Today.
 - Status bar and home-indicator insets.
-- iPad, if `supportsTablet` stays true.
-- A click-through of build 1 on TestFlight, as opposed to this web render of the same commit.
+- A click-through of the TestFlight build, as opposed to this web render. Build 2 turns tablet support off, so an iPad screenshot set is not part of that build.
+
+## Build 2 update (14 Nov 2026)
+
+`04-progress.png` was recaptured from the build 2 progress screen. The recent day reads "Nov 14" (short month, numeric day, no year because 2026 is the current year). The subtitle is still "Track your strength and consistency". The other four listing frames were not recaptured: the tab icons were already Ionicons (`home`, `calendar`, `barbell`, `stats-chart`, `person`) and build 2 does not change them. The code for the date format, the README credit note, and `supportsTablet: false` is on `release/build2`, not on this branch.

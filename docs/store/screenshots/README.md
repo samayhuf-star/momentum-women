@@ -9,7 +9,7 @@ Pixel size for every file: **1290 × 2796** (portrait, the 6.9" slot). No captio
 | `ios-6.9/01-home.png` | Today | Beginner Strength, Start, on-device stats (1 workout, 1 streak), quick actions, Unlock Pro |
 | `ios-6.9/02-workout.png` | Workout player | Beginner session, exercise 1 of 6, Goblet Squat still, form cue, timer at 00:40 |
 | `ios-6.9/03-exercise-detail.png` | Exercise detail | Push-Up opened from the library (1 of 1), still, form cue, timer |
-| `ios-6.9/04-progress.png` | Progress | Day streak 1, workouts 1, Saturday marked, recent day 2026-11-14 |
+| `ios-6.9/04-progress.png` | Progress | Day streak 1, workouts 1, Saturday marked, recent day "Nov 14" |
 | `ios-6.9/05-plans.png` | Plans | Beginner Strength (free), Full Body · Pro, Upper Body · Pro |
 
 Not included, on purpose: permission prompts, Profile, Credits, the paywall, and Restore.
@@ -27,7 +27,9 @@ Captured 14 Nov 2026 on Linux. There is no iOS Simulator here, so the screens ar
 
 The stills are the files the app already requires. Goblet Squat and Push-Up are Open Exercise Illustrations (CC0 1.0), from the pin in `assets/exercise-media/LICENSE-SOURCES.md`. No stock art and no generated imagery.
 
-The repo credits one CC BY-SA 4.0 still, not two: Pilates Hundred (`pilates-hundred-hold.jpg`, Helisusa, Wikimedia Commons). It is not in this set. It is on the Credits screen in the app.
+The one CC BY-SA 4.0 still that ships is Pilates Hundred (`pilates-hundred-hold.jpg`, Helisusa, Wikimedia Commons). It is credited on the Credits screen and is not in this set.
+
+`04-progress.png` was recaptured from the build 2 date formatting (`formatProgressDay`: short month, numeric day, year only when it is not the current year). The other four frames were left as they were. The tab bar already uses Ionicons, and build 2 does not change those icons, so frames that only show the tab bar were not regenerated.
 
 ## Web-only limits
 
