@@ -1,9 +1,20 @@
 #!/usr/bin/env bash
-# Momentum flow for .github/workflows/sim-qa.yml.
+# Momentum flow for .github/workflows/sim-qa.yml on AI-Samay/sim-qa-runner.
 # Env from the workflow: UDID, BUNDLE_ID, SCHEME, WORKSPACE, DERIVED_DATA, OUT.
 # Installs the app, then runs MomentumWomenQATests XCUITest: guest launch, home, workout
 # (exercise-detail media), the five listing screens under $OUT/listing, paywall, Restore.
 # When LISTING_SIZE is 1290x2796 (6.9" simulator), those five PNGs must be that size.
+#
+# Prepared dispatch, not started:
+#   workflow: iOS Simulator QA
+#   repo: samayhuf-star/momentum-women
+#   ref: release/build2
+#   device: 6.9
+#   flow_script: qa/sim-qa/flow.sh
+#   prepare_script: qa/sim-qa/prepare.sh
+# Apply qa/sim-qa/sim-qa-runner-6.9.patch on AI-Samay/sim-qa-runner first.
+# A blank device keeps the existing iPhone Pro preference. This agent could not
+# push that repo (403). Do not dispatch until asked.
 set -euo pipefail
 : "${UDID:?}" "${BUNDLE_ID:?}" "${SCHEME:?}" "${WORKSPACE:?}" "${DERIVED_DATA:?}" "${OUT:?}"
 mkdir -p "$OUT"
