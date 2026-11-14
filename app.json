@@ -29,6 +29,12 @@
       "expo-router",
       "expo-iap"
     ],
-    "scheme": "momentum-women"
+    "scheme": "momentum-women",
+    "extra": {
+      "eas": {
+        "projectId": "53a2cf35-ce2a-4aa6-aa9f-f63b318a9f5f"
+      }
+    },
+    "owner": "krosz"
   }
 }

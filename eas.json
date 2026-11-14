@@ -13,7 +13,8 @@
     },
     "production": {
       "ios": {
-        "image": "auto"
+        "image": "auto",
+        "distribution": "store"
       }
     }
   },
