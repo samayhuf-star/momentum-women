@@ -1,6 +1,7 @@
-import { Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import {
   currentEntitlementIOS,
+  deepLinkToSubscriptions,
   ErrorCode,
   fetchProducts,
   finishTransaction,
@@ -19,8 +20,10 @@ import {
   type ProductOrSubscription,
   type Purchase,
 } from 'expo-iap';
+import { showManageSubscriptionsIOS } from 'expo-iap/build/modules/ios';
 import { ALL_PRODUCT_IDS, IAP_PRODUCT_IDS, SUB_PRODUCT_IDS, isKnownProduct, PRODUCT_CATALOG } from './pro';
 import { freeTrialDays, type ProductLike } from './introOffer';
+import { openManageSubscriptions } from './manageSubscriptions';
 
 export type Plan = (typeof PRODUCT_CATALOG)[number] & {
   price: string;
@@ -249,6 +252,15 @@ export async function buy(plan: Plan): Promise<BuyResult> {
     return 'error';
   }
   return result;
+}
+
+export async function manageSubscription(): Promise<void> {
+  await openManageSubscriptions({
+    platform: Platform.OS,
+    showManage: () => showManageSubscriptionsIOS(),
+    deepLink: () => deepLinkToSubscriptions(),
+    openURL: (url) => Linking.openURL(url),
+  });
 }
 
 export async function restore(): Promise<boolean> {
