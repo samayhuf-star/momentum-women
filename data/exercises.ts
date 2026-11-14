@@ -1,7 +1,7 @@
 export type Exercise = {
   id: string;
   name: string;
-  category: 'Lower Body' | 'Upper Body' | 'Core' | 'Full Body' | 'Pilates' | 'Mobility';
+  category: 'Lower Body' | 'Upper Body' | 'Core' | 'Full Body';
   equipment: 'None' | 'Dumbbells' | 'Resistance Band' | 'Gym';
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   muscles: string[];
@@ -44,7 +44,7 @@ export const exercises: Exercise[] = [
   { id: 'row', name: 'Dumbbell Row', category: 'Upper Body', equipment: 'Dumbbells', difficulty: 'Beginner', muscles: ['Back', 'Biceps'], description: 'Hinge, pull elbow back, squeeze shoulder blade.' },
   { id: 'overhead-ext', name: 'Overhead Triceps Extension', category: 'Upper Body', equipment: 'Dumbbells', difficulty: 'Intermediate', muscles: ['Triceps'], description: 'Keep elbows close, extend fully.' },
 
-  // Core (10)
+  // Core (11 visible)
   { id: 'bicycle-crunches', name: 'Bicycle Crunches', category: 'Core', equipment: 'None', difficulty: 'Beginner', muscles: ['Obliques', 'Abs'], description: 'Elbow to opposite knee, extend the other leg slowly.' },
   { id: 'leg-raises', name: 'Leg Raises', category: 'Core', equipment: 'None', difficulty: 'Intermediate', muscles: ['Lower Abs'], description: 'Lower legs slowly without letting your lower back lift.' },
   { id: 'russian-twist', name: 'Russian Twist', category: 'Core', equipment: 'None', difficulty: 'Intermediate', muscles: ['Obliques'], description: 'Rotate fully. Keep feet elevated if possible.' },
@@ -55,25 +55,23 @@ export const exercises: Exercise[] = [
   { id: 'bird-dog', name: 'Bird Dog', category: 'Core', equipment: 'None', difficulty: 'Beginner', muscles: ['Core', 'Back'], description: 'Extend opposite arm and leg, keep hips level.' },
   { id: 'plank', name: 'Plank', category: 'Core', equipment: 'None', difficulty: 'Beginner', muscles: ['Core'], description: 'Hold straight line from head to heels.' },
   { id: 'mountain-climber', name: 'Mountain Climbers', category: 'Core', equipment: 'None', difficulty: 'Intermediate', muscles: ['Core', 'Shoulders'], description: 'Drive knees in controlled pace.' },
+  { id: 'pilates-hundred', name: 'Pilates Hundred', category: 'Core', equipment: 'None', difficulty: 'Beginner', muscles: ['Core'], description: 'Pump arms while holding legs extended.' },
+  { id: 'roll-up', name: 'Pilates Roll-Up', category: 'Core', equipment: 'None', difficulty: 'Intermediate', muscles: ['Abs'], description: 'Roll up vertebra by vertebra.', hidden: true },
 
-  // Full Body (4)
+  // Full Body (5 visible)
   { id: 'thruster', name: 'Thruster', category: 'Full Body', equipment: 'Dumbbells', difficulty: 'Advanced', muscles: ['Full Body'], description: 'Squat into overhead press.' },
   { id: 'burpee', name: 'Burpee', category: 'Full Body', equipment: 'None', difficulty: 'Advanced', muscles: ['Full Body'], description: 'Squat, plank, jump.' },
   { id: 'kettlebell-swing', name: 'Kettlebell Swing', category: 'Full Body', equipment: 'Dumbbells', difficulty: 'Intermediate', muscles: ['Glutes', 'Core'], description: 'Hinge and swing to shoulder height.' },
   { id: 'clean-press', name: 'Dumbbell Clean & Press', category: 'Full Body', equipment: 'Dumbbells', difficulty: 'Advanced', muscles: ['Full Body'], description: 'Pull to shoulders then press overhead.', hidden: true },
-
-  // Pilates & Mobility (6)
-  { id: 'pilates-hundred', name: 'Pilates Hundred', category: 'Pilates', equipment: 'None', difficulty: 'Beginner', muscles: ['Core'], description: 'Pump arms while holding legs extended.' },
-  { id: 'roll-up', name: 'Pilates Roll-Up', category: 'Pilates', equipment: 'None', difficulty: 'Intermediate', muscles: ['Abs'], description: 'Roll up vertebra by vertebra.', hidden: true },
-  { id: 'cat-cow', name: 'Cat-Cow', category: 'Mobility', equipment: 'None', difficulty: 'Beginner', muscles: ['Spine'], description: 'Alternate arching and rounding the back.' },
-  { id: 'hip-circles', name: 'Hip Circles', category: 'Mobility', equipment: 'None', difficulty: 'Beginner', muscles: ['Hips'], description: 'Circle hips to open the joint.', hidden: true },
-  { id: 'shoulder-circles', name: 'Shoulder Circles', category: 'Mobility', equipment: 'None', difficulty: 'Beginner', muscles: ['Shoulders'], description: 'Large controlled circles.' },
-  { id: 'world-greatest', name: "World's Greatest Stretch", category: 'Mobility', equipment: 'None', difficulty: 'Beginner', muscles: ['Hips', 'Thoracic'], description: 'Lunge with rotation.', hidden: true },
+  { id: 'cat-cow', name: 'Cat-Cow', category: 'Full Body', equipment: 'None', difficulty: 'Beginner', muscles: ['Spine'], description: 'Alternate arching and rounding the back.' },
+  { id: 'hip-circles', name: 'Hip Circles', category: 'Full Body', equipment: 'None', difficulty: 'Beginner', muscles: ['Hips'], description: 'Circle hips to open the joint.', hidden: true },
+  { id: 'shoulder-circles', name: 'Shoulder Circles', category: 'Full Body', equipment: 'None', difficulty: 'Beginner', muscles: ['Shoulders'], description: 'Large controlled circles.' },
+  { id: 'world-greatest', name: "World's Greatest Stretch", category: 'Full Body', equipment: 'None', difficulty: 'Beginner', muscles: ['Hips', 'Thoracic'], description: 'Lunge with rotation.', hidden: true },
 ];
 
 export const visibleExercises = exercises.filter((e) => !e.hidden);
 
-export const categories = ['Lower Body','Upper Body','Core','Full Body','Pilates','Mobility'] as const;
+export const categories = ['Lower Body','Upper Body','Core','Full Body'] as const;
 
 export type TrainingPlan = {
   id: string;

@@ -10,8 +10,6 @@ const ICONS: Record<string, { letter: string; bg: string; fg: string }> = {
   'lower body': { letter: 'LB', bg: '#3D5A80', fg: '#FFFFFF' },
   'upper body': { letter: 'UB', bg: '#4A6741', fg: '#FFFFFF' },
   'full body': { letter: 'FB', bg: '#6B3B4C', fg: '#FFFFFF' },
-  pilates: { letter: 'PI', bg: '#6B5A3B', fg: '#FFFFFF' },
-  mobility: { letter: 'MO', bg: '#3B5A6B', fg: '#FFFFFF' },
 };
 
 type Props = {
