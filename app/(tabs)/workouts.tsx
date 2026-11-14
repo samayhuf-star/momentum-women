@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
-import { exercises, categories } from '../../data/exercises';
+import { visibleExercises, categories } from '../../data/exercises';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 
@@ -7,7 +7,7 @@ export default function WorkoutsScreen() {
   const [selected, setSelected] = useState<string | null>(null);
   const router = useRouter();
 
-  const filtered = selected ? exercises.filter((e) => e.category === selected) : exercises;
+  const filtered = selected ? visibleExercises.filter((e) => e.category === selected) : visibleExercises;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>

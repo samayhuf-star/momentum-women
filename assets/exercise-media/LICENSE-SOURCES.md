@@ -1,6 +1,6 @@
 # Exercise media sources (Momentum – Women's Workout)
 
-All stills in `assets/exercise-media/` come from **Open Exercise Illustrations**.
+Stills in `assets/exercise-media/` come from verified licence-safe sources: **Open Exercise Illustrations** (CC0-1.0) and **Wikimedia Commons** (CC BY-SA 4.0). Files are used unmodified. No placeholders ship in the app. Exercises without a visually matching still are hidden from the library and from every workout and plan.
 
 | Field | Value |
 | --- | --- |
@@ -11,13 +11,22 @@ All stills in `assets/exercise-media/` come from **Open Exercise Illustrations**
 | Attribution | Not required. A courtesy credit is shown on the in-app Credits screen. |
 | Files included | Only stills listed below. No third-party GIFs. No files from JahelCuadrado/ExerciseGymGifsDB, yuhonas/free-exercise-db, or wrkout/exercises.json. |
 
+| Field | Value |
+| --- | --- |
+| Source | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Pilates-hundred-sata.jpg) |
+| File | File:Pilates-hundred-sata.jpg |
+| Author | Helisusa |
+| Licence | **CC BY-SA 4.0** (Creative Commons Attribution-ShareAlike 4.0 International) |
+| Licence text | https://creativecommons.org/licenses/by-sa/4.0/legalcode |
+| Attribution | Required. Credit is shown on the in-app Credits screen. The shipped still is the official Wikimedia 1280px render of the same work, used unmodified (no crop or other edit). |
+
 ## Licence excerpt (CC0 1.0 Waiver)
 
 > 2. Waiver. To the greatest extent permitted by, but not in contravention of, applicable law, Affirmer hereby overtly, fully, permanently, irrevocably and unconditionally waives, abandons, and surrenders all of Affirmer's Copyright and Related Rights and associated claims and causes of action... (i) in all territories worldwide, (ii) for the maximum duration provided by applicable law or treaty... (iii) in any current or future medium and for any number of copies, and (iv) for any purpose whatsoever, including without limitation commercial, advertising or promotional purposes.
 
 ## Mapped exercises
 
-45 of 49 exercises have a still. Each mapped row was visually checked against the exercise name. Isometric moves use a single hold frame. Others use start and end frames (crossfade in the app).
+46 of 50 catalog exercises have a still and are shown in the app. 4 exercises without a visually matching licence-safe still are hidden (including World's Greatest Stretch, which had no still). Each mapped row was visually checked against the exercise name. Isometric moves use a single hold frame. Others use start and end frames (crossfade in the app).
 
 | App id | App name | OEI id | OEI name | Files | Source URL | Licence |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -66,17 +75,21 @@ All stills in `assets/exercise-media/` come from **Open Exercise Illustrations**
 | `kettlebell-swing` | Kettlebell Swing | `kettlebell-swing` | Kettlebell Swing | `kettlebell-swing-start.webp`, `kettlebell-swing-end.webp` | https://raw.githubusercontent.com/hitmanrepo/open-exercise-illustrations/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/kettlebell-swing/start.webp<br>https://raw.githubusercontent.com/hitmanrepo/open-exercise-illustrations/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/kettlebell-swing/end.webp | CC0-1.0 |
 | `cat-cow` | Cat-Cow | `cat-cow` | Cat-Cow | `cat-cow-start.webp`, `cat-cow-end.webp` | https://raw.githubusercontent.com/hitmanrepo/open-exercise-illustrations/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/cat-cow/start.webp<br>https://raw.githubusercontent.com/hitmanrepo/open-exercise-illustrations/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/cat-cow/end.webp | CC0-1.0 |
 | `shoulder-circles` | Shoulder Circles | `arm-circles` | Arm Circles | `arm-circles-start.webp`, `arm-circles-end.webp` | https://raw.githubusercontent.com/hitmanrepo/open-exercise-illustrations/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/arm-circles/start.webp<br>https://raw.githubusercontent.com/hitmanrepo/open-exercise-illustrations/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/arm-circles/end.webp | CC0-1.0 |
+| `pilates-hundred` | Pilates Hundred | File:Pilates-hundred-sata.jpg | Pilates Hundred (sata) by Helisusa | `pilates-hundred-hold.jpg` | https://commons.wikimedia.org/wiki/File:Pilates-hundred-sata.jpg<br>https://commons.wikimedia.org/wiki/Special:FilePath/Pilates-hundred-sata.jpg?width=1280 | CC BY-SA 4.0 |
 
-## Unmatched (placeholder)
+## Hidden (no visually matching licence-safe still)
+
+These exercises are kept in the catalog data with `hidden: true` and are omitted from the library and from every workout and plan. No placeholder image ships for them.
 
 | App id | App name | Reason |
 | --- | --- | --- |
-| `clean-press` | Dumbbell Clean & Press | No clean-and-press illustration in the verified set (nearby clean or press stills are different movements). |
-| `pilates-hundred` | Pilates Hundred | No matching still in the verified set. |
-| `roll-up` | Pilates Roll-Up | No matching still in the verified set. |
-| `hip-circles` | Hip Circles | No matching still in the verified set. |
+| `clean-press` | Dumbbell Clean & Press | No verified still of a dumbbell clean and press (available clean-and-press artwork is a barbell multi-panel, a different movement). |
+| `roll-up` | Pilates Roll-Up | No verified still of a Pilates roll-up. |
+| `hip-circles` | Hip Circles | No verified still that clearly shows circling the hips to open the joint. |
+| `world-greatest` | World's Greatest Stretch | No verified still of a lunge with rotation. |
 
-## In-app credit line (courtesy, not required)
+## In-app credit lines
 
 Exercise illustrations are from the Open Exercise Illustrations project (https://github.com/hitmanrepo/open-exercise-illustrations), dedicated to the public domain under CC0 1.0. Attribution is not required.
 
+Pilates Hundred (File:Pilates-hundred-sata.jpg) is by Helisusa, Wikimedia Commons, licensed under CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/). https://commons.wikimedia.org/wiki/File:Pilates-hundred-sata.jpg. Used unmodified.

@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useProgress } from '../../context/ProgressContext';
 import { usePro } from '../../context/ProContext';
-import { plans } from '../../data/exercises';
+import { visiblePlans as plans } from '../../data/exercises';
 
 export default function TodayScreen() {
   const router = useRouter();

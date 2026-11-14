@@ -184,6 +184,9 @@ const MEDIA: Record<string, ExerciseMediaFrames> = {
     start: require('../assets/exercise-media/arm-circles-start.webp'),
     end: require('../assets/exercise-media/arm-circles-end.webp')
   },
+  'pilates-hundred': {
+    hold: require('../assets/exercise-media/pilates-hundred-hold.jpg')
+  },
 };
 
 export function mediaFor(id: string): ExerciseMediaFrames | null {
