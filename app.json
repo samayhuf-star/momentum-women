@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Momentum – Women's Workout",
+    "slug": "momentum-women",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFF5F8"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.samayvashsht.momentumwomen",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.samayvashsht.momentumwomen",
+      "adaptiveIcon": {
+        "backgroundColor": "#FFF5F8"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-iap"
+    ],
+    "scheme": "momentum-women"
+  }
+}
