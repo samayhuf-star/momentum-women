@@ -79,6 +79,9 @@ export type TrainingPlan = {
   description: string;
   isPro: boolean;
   exerciseIds: string[];
+  /** How many sessions this plan contains. These plans are a single session. */
+  sessions: number;
+  accent: string;
 };
 
 export const plans: TrainingPlan[] = [
@@ -87,6 +90,8 @@ export const plans: TrainingPlan[] = [
     name: 'Beginner Strength',
     description: 'A short full-body session using beginner exercises from the library.',
     isPro: false,
+    sessions: 1,
+    accent: '#FF6B9D',
     exerciseIds: ['goblet-squat', 'glute-bridge', 'push-up', 'bicycle-crunches', 'calf-raise', 'bird-dog'],
   },
   {
@@ -94,6 +99,8 @@ export const plans: TrainingPlan[] = [
     name: 'Full Body',
     description: 'A longer mixed session drawn from lower body, upper body and core work.',
     isPro: true,
+    sessions: 1,
+    accent: '#FF8E53',
     exerciseIds: ['goblet-squat', 'rdl', 'dumbbell-press', 'shoulder-press', 'row', 'leg-raises', 'thruster', 'plank'],
   },
   {
@@ -101,6 +108,8 @@ export const plans: TrainingPlan[] = [
     name: 'Upper Body',
     description: 'Pressing, pulling and arm work from the library.',
     isPro: true,
+    sessions: 1,
+    accent: '#C43B6E',
     exerciseIds: ['dumbbell-press', 'incline-press', 'shoulder-press', 'front-raise', 'row', 'biceps-curl', 'triceps-ext', 'rear-delt'],
   },
 ];
