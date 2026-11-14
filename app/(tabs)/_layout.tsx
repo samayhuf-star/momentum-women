@@ -22,6 +22,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Today',
+          tabBarButtonTestID: 'today-tab',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color as string} />
           ),
@@ -31,6 +32,7 @@ export default function TabLayout() {
         name="plans"
         options={{
           title: 'Plans',
+          tabBarButtonTestID: 'plans-tab',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calendar" size={size} color={color as string} />
           ),
@@ -40,6 +42,7 @@ export default function TabLayout() {
         name="workouts"
         options={{
           title: 'Workouts',
+          tabBarButtonTestID: 'workouts-tab',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="barbell" size={size} color={color as string} />
           ),
@@ -49,6 +52,7 @@ export default function TabLayout() {
         name="progress"
         options={{
           title: 'Progress',
+          tabBarButtonTestID: 'progress-tab',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="stats-chart" size={size} color={color as string} />
           ),

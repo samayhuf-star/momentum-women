@@ -21,7 +21,7 @@ export default function CreditsScreen() {
           public domain under CC0 1.0. Attribution is not required. This credit is included
           as a courtesy. Illustrations may not show every variation of an exercise.
         </Text>
-        <Text style={styles.heading}>Wikimedia Commons photographs</Text>
+        <Text style={styles.heading}>Wikimedia Commons photograph</Text>
         <Text style={styles.body}>
           Pilates Hundred (File:Pilates-hundred-sata.jpg) is by Helisusa, Wikimedia
           Commons, licensed under CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/).

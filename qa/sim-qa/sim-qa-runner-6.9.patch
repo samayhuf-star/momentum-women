@@ -1,0 +1,91 @@
+diff --git a/.github/workflows/sim-qa.yml b/.github/workflows/sim-qa.yml
+index 3b2e715..17f58ae 100644
+--- a/.github/workflows/sim-qa.yml
++++ b/.github/workflows/sim-qa.yml
+@@ -1,4 +1,14 @@
+ # Generic iOS Simulator QA for a PUBLIC Expo app repo, run from this repo.
++#
++# Momentum Women build 2 listing shots are prepared and not dispatched:
++#   repo: samayhuf-star/momentum-women
++#   ref: release/build2
++#   device: "6.9"
++#   flow_script: qa/sim-qa/flow.sh
++#   prepare_script: qa/sim-qa/prepare.sh
++# That boots an iPhone Plus (1290x2796) and the app flow writes five main
++# screens to $OUT/listing. Do not dispatch until asked. Leave device blank
++# for every other app.
+ # Manual trigger only (workflow_dispatch). Uses no secrets and no signing identity.
+ # Runs on GitHub's free hosted macOS runners (no cost on a public repo).
+ #
+@@ -46,6 +56,10 @@ on:
+         required: false
+         type: boolean
+         default: false
++      device:
++        description: 'Simulator to boot. Blank keeps the usual iPhone Pro preference. "6.9" boots an iPhone Plus so listing shots are 1290x2796. Or pass a device name such as "iPhone 16 Plus".'
++        required: false
++        default: ''
+ 
+ concurrency:
+   group: sim-qa-${{ inputs.repo }}-${{ inputs.ref }}
+@@ -81,18 +95,54 @@ jobs:
+           persist-credentials: false
+ 
+       - name: Boot iPhone simulator
++        env:
++          DEVICE: ${{ inputs.device }}
+         run: |
+           set -euo pipefail
+           mkdir -p "$OUT"
+           xcodebuild -version | tee "$OUT/xcode-version.txt"
+-          UDID=$(xcrun simctl list devices available -j | python3 -c '
+-          import json,sys
++          NAME=$(DEVICE="$DEVICE" OUT="$OUT" xcrun simctl list devices available -j | python3 -c '
++          import json,os,sys
++          want=(os.environ.get("DEVICE") or "").strip()
+           d=json.load(sys.stdin)["devices"]
+-          ph=[(r,x["name"],x["udid"]) for r,v in d.items() if "iOS" in r for x in v if x["name"].startswith("iPhone")]
+-          pref=["iPhone 16 Pro","iPhone 16","iPhone 15 Pro","iPhone 15","iPhone 17 Pro","iPhone 17"]
+-          ph.sort(key=lambda p: (pref.index(p[1]) if p[1] in pref else 99, p[0]), reverse=False)
+-          print(ph[0][2]); sys.stderr.write("simulator: %s %s\n" % (ph[0][1], ph[0][0]))')
++          ph=[(r,x["name"],x["udid"]) for r,v in d.items() if "iOS" in r for x in v if x.get("isAvailable", True) and x["name"].startswith("iPhone")]
++          def pick(names):
++              for name in names:
++                  hits=[p for p in ph if p[1]==name]
++                  if hits:
++                      hits.sort(key=lambda p: p[0])
++                      return hits[-1]
++              return None
++          if want=="6.9":
++              # iPhone Plus, 430x932 points at 3x, is the 6.9" listing size 1290x2796.
++              chosen=pick(["iPhone 17 Plus","iPhone 16 Plus","iPhone 15 Plus","iPhone 14 Plus"])
++              if not chosen:
++                  sys.stderr.write("no iPhone Plus simulator for 1290x2796\n")
++                  sys.exit(1)
++          elif want:
++              chosen=pick([want]) or None
++              if not chosen:
++                  hits=[p for p in ph if p[1].startswith(want)]
++                  if not hits:
++                      sys.stderr.write("simulator not found: %s\n"%want)
++                      sys.exit(1)
++                  hits.sort(key=lambda p: p[0])
++                  chosen=hits[-1]
++          else:
++              pref=["iPhone 16 Pro","iPhone 16","iPhone 15 Pro","iPhone 15","iPhone 17 Pro","iPhone 17"]
++              ph.sort(key=lambda p: (pref.index(p[1]) if p[1] in pref else 99, p[0]))
++              if not ph:
++                  sys.stderr.write("no iPhone simulator\n")
++                  sys.exit(1)
++              chosen=ph[0]
++          open(os.path.join(os.environ["OUT"], "simulator.txt"), "w").write(chosen[1]+"\n")
++          print(chosen[2])
++          sys.stderr.write("simulator: %s %s\n"%(chosen[1], chosen[0]))')
++          UDID="$NAME"
+           echo "UDID=$UDID" >> "$GITHUB_ENV"
++          if [ "$DEVICE" = "6.9" ] || [[ "$DEVICE" == *"Plus"* ]]; then
++            echo "LISTING_SIZE=1290x2796" >> "$GITHUB_ENV"
++          fi
+           xcrun simctl boot "$UDID" || true
+           xcrun simctl bootstatus "$UDID" -b
+           xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 || true

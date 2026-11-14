@@ -14,7 +14,7 @@ export default function WorkoutsScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={TAB_EDGES}>
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} testID="library">
       <Text style={styles.title}>Library</Text>
       <Text style={styles.subtitle}>Browse exercises and start one at a time</Text>
 
