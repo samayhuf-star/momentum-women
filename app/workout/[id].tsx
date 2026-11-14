@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, Pressable, SafeAreaView, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState, useEffect } from 'react';
 import { exercises, visibleExercises } from '../../data/exercises';

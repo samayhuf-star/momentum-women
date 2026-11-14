@@ -6,11 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FFF5F8"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.samayvashsht.momentumwomen",
@@ -27,7 +22,15 @@
     },
     "plugins": [
       "expo-router",
-      "expo-iap"
+      "expo-iap",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#FFF5F8"
+        }
+      ]
     ],
     "scheme": "momentum-women",
     "extra": {
