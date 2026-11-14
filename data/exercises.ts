@@ -6,6 +6,7 @@ export type Exercise = {
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   muscles: string[];
   description: string;
+  hidden?: boolean;
 };
 
 export const exercises: Exercise[] = [
@@ -59,16 +60,18 @@ export const exercises: Exercise[] = [
   { id: 'thruster', name: 'Thruster', category: 'Full Body', equipment: 'Dumbbells', difficulty: 'Advanced', muscles: ['Full Body'], description: 'Squat into overhead press.' },
   { id: 'burpee', name: 'Burpee', category: 'Full Body', equipment: 'None', difficulty: 'Advanced', muscles: ['Full Body'], description: 'Squat, plank, jump.' },
   { id: 'kettlebell-swing', name: 'Kettlebell Swing', category: 'Full Body', equipment: 'Dumbbells', difficulty: 'Intermediate', muscles: ['Glutes', 'Core'], description: 'Hinge and swing to shoulder height.' },
-  { id: 'clean-press', name: 'Dumbbell Clean & Press', category: 'Full Body', equipment: 'Dumbbells', difficulty: 'Advanced', muscles: ['Full Body'], description: 'Pull to shoulders then press overhead.' },
+  { id: 'clean-press', name: 'Dumbbell Clean & Press', category: 'Full Body', equipment: 'Dumbbells', difficulty: 'Advanced', muscles: ['Full Body'], description: 'Pull to shoulders then press overhead.', hidden: true },
 
   // Pilates & Mobility (6)
   { id: 'pilates-hundred', name: 'Pilates Hundred', category: 'Pilates', equipment: 'None', difficulty: 'Beginner', muscles: ['Core'], description: 'Pump arms while holding legs extended.' },
-  { id: 'roll-up', name: 'Pilates Roll-Up', category: 'Pilates', equipment: 'None', difficulty: 'Intermediate', muscles: ['Abs'], description: 'Roll up vertebra by vertebra.' },
+  { id: 'roll-up', name: 'Pilates Roll-Up', category: 'Pilates', equipment: 'None', difficulty: 'Intermediate', muscles: ['Abs'], description: 'Roll up vertebra by vertebra.', hidden: true },
   { id: 'cat-cow', name: 'Cat-Cow', category: 'Mobility', equipment: 'None', difficulty: 'Beginner', muscles: ['Spine'], description: 'Alternate arching and rounding the back.' },
-  { id: 'hip-circles', name: 'Hip Circles', category: 'Mobility', equipment: 'None', difficulty: 'Beginner', muscles: ['Hips'], description: 'Circle hips to open the joint.' },
+  { id: 'hip-circles', name: 'Hip Circles', category: 'Mobility', equipment: 'None', difficulty: 'Beginner', muscles: ['Hips'], description: 'Circle hips to open the joint.', hidden: true },
   { id: 'shoulder-circles', name: 'Shoulder Circles', category: 'Mobility', equipment: 'None', difficulty: 'Beginner', muscles: ['Shoulders'], description: 'Large controlled circles.' },
-  { id: 'world-greatest', name: "World's Greatest Stretch", category: 'Mobility', equipment: 'None', difficulty: 'Beginner', muscles: ['Hips', 'Thoracic'], description: 'Lunge with rotation.' },
+  { id: 'world-greatest', name: "World's Greatest Stretch", category: 'Mobility', equipment: 'None', difficulty: 'Beginner', muscles: ['Hips', 'Thoracic'], description: 'Lunge with rotation.', hidden: true },
 ];
+
+export const visibleExercises = exercises.filter((e) => !e.hidden);
 
 export const categories = ['Lower Body','Upper Body','Core','Full Body','Pilates','Mobility'] as const;
 
@@ -103,3 +106,8 @@ export const plans: TrainingPlan[] = [
     exerciseIds: ['dumbbell-press', 'incline-press', 'shoulder-press', 'front-raise', 'row', 'biceps-curl', 'triceps-ext', 'rear-delt'],
   },
 ];
+
+export const visiblePlans: TrainingPlan[] = plans.map((plan) => ({
+  ...plan,
+  exerciseIds: plan.exerciseIds.filter((id) => visibleExercises.some((e) => e.id === id)),
+}));

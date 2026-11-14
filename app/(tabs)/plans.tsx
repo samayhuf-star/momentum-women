@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
-import { plans } from '../../data/exercises';
+import { visiblePlans as plans } from '../../data/exercises';
 import { usePro } from '../../context/ProContext';
 
 export default function PlansScreen() {

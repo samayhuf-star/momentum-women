@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Pressable, SafeAreaView, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState, useEffect } from 'react';
-import { exercises } from '../../data/exercises';
+import { exercises, visibleExercises } from '../../data/exercises';
 import { useProgress } from '../../context/ProgressContext';
 import ExerciseMedia from '../../components/ExerciseMedia';
 
@@ -12,8 +12,10 @@ export default function WorkoutPlayer() {
 
   const list = useMemo(() => {
     const ordered = ids ? ids.split(',').filter(Boolean) : id ? [id] : [];
-    const found = ordered.map((item) => exercises.find((e) => e.id === item)).filter(Boolean);
-    return found.length ? found : exercises.slice(0, 1);
+    const found = ordered
+      .map((item) => visibleExercises.find((e) => e.id === item))
+      .filter((e): e is NonNullable<typeof e> => Boolean(e));
+    return found.length ? found : visibleExercises.slice(0, 1);
   }, [id, ids]);
 
   const [index, setIndex] = useState(0);
