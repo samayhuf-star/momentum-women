@@ -18,14 +18,16 @@ type Props = {
   muscle?: string;
   testID?: string;
   dark?: boolean;
+  large?: boolean;
 };
 
-export default function ExerciseMedia({ id, name, muscle, testID = 'exercise-detail', dark = false }: Props) {
+export default function ExerciseMedia({ id, name, muscle, testID = 'exercise-detail', dark = false, large = false }: Props) {
   const media = id ? mediaFor(id) : null;
   const start = media?.start || media?.hold || null;
   const end = media?.end || null;
   const fade = useRef(new Animated.Value(0)).current;
   const styles = dark ? darkStyles : lightStyles;
+  const frameHeight = large ? 240 : 200;
   const key = (muscle || '').toLowerCase();
   const icon = ICONS[key] || { letter: (muscle || 'EX').slice(0, 2).toUpperCase(), bg: '#4A5568', fg: '#FFFFFF' };
 
@@ -49,10 +51,10 @@ export default function ExerciseMedia({ id, name, muscle, testID = 'exercise-det
   return (
     <View style={styles.wrap} testID={testID} accessible accessibilityRole="image" accessibilityLabel={`${name}${muscle ? `, ${muscle}` : ''}`}>
       {start ? (
-        <View style={styles.frame}>
-          <Image source={start} style={styles.image} resizeMode="contain" />
+        <View style={[styles.frame, { height: frameHeight }]}>
+          <Image source={start} style={[styles.image, { height: frameHeight }]} resizeMode="contain" />
           {end ? (
-            <Animated.Image source={end} style={[styles.image, styles.overlay, { opacity: fade }]} resizeMode="contain" />
+            <Animated.Image source={end} style={[styles.image, styles.overlay, { height: frameHeight, opacity: fade }]} resizeMode="contain" />
           ) : null}
         </View>
       ) : (

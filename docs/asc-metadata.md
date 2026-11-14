@@ -4,7 +4,7 @@
 - No ASC writes have been made. App records do not exist yet (Samay creates them).
 - Category for both: primary **Health & Fitness**. Suggested secondary: Lifestyle.
 - Copyright: 2026 Samay Vashsht
-- Review contact (both): name Samay Vashsht, phone +91 9953710111, email samayhuf@gmail.com
+- Review contact (both): name Samay Vashsht, phone [phone redacted], email samayhuf@gmail.com
 - Support URL (once published): men `https://samayhuf-star.github.io/app-legal/momentum-men/support.html`; women `.../momentum-women/support.html`
 - Privacy / terms: see each app below. Grievance officer on those pages is Samay Vashsht, email only (samayhuf@gmail.com), no phone.
 - Age rating suggestion: 4+, no unrestricted web, no user-generated content, no HealthKit in the v1 plan. Revisit if HealthKit is kept.

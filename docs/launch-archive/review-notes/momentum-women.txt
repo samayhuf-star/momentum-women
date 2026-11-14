@@ -1,0 +1,37 @@
+DRAFT — do not paste into App Review until the feature-branch binary is the one described here: expo-iap paywall live, third-party GIFs removed, HealthKit removed, Today/Plans placeholders gone, no "sign in later" promise, no cycle-diagnosis copy. Update if any of that changes.
+
+1. Purpose and target audience
+Momentum – Women's Workout is a consumer training app for women who want guided sessions on iPhone, with a timer or a rep counter and short form cues, plus a Today view of the next workout. It is a general fitness tool. It does not diagnose, treat, or prevent any condition, and it does not give medical, diet, cycle, or weight-loss advice. The app is free to download (US $0.00).
+
+2. Setup and how to reach the main and paid features
+No account is required. The app is not a hard paywall.
+
+• First launch offers Continue as Guest. Progress is stored on the device only. There is no later sign-in.
+• Today shows the suggested session and real on-device stats (streak and completed workouts). The user can start that session or browse the exercise library and plans.
+• Workout: each exercise shows a name and a form cue. The user can train by timer or by reps. Finishing a session updates Progress on the device.
+• Profile is for guest status and a log out of the on-device session only.
+
+Paid features (Momentum Pro) open only when a Pro control is tapped. The paywall has a close control.
+
+• Open the paywall from the Pro control on Today, Profile, or a locked plan.
+• Pro unlocks the remaining plans and the full library extras shown on the paywall. A basic session from Today and the workout player stay free.
+• Restore purchases is on the paywall.
+
+Products sold through Apple In-App Purchase (StoreKit 2), US prices:
+• com.samayvashsht.momentumwomen.monthly — $2.99/month, 7-day free trial for new subscribers
+• com.samayvashsht.momentumwomen.yearly — $19.99/year, 7-day free trial for new subscribers
+• com.samayvashsht.momentumwomen.lifetime — $39.99 one-time non-consumable, no trial
+After a trial, the subscription starts unless cancelled at least 24 hours before the trial ends. Lifetime does not renew. In-app prices are the App Store's localised prices. When the store reports a trial, the paywall shows "7 days free, then <price>, cancel anytime".
+
+3. External services
+Payments use Apple In-App Purchase (StoreKit 2 via expo-iap). There is no other payment processor and no account service of ours. Workout history is stored on the device (AsyncStorage) and is not uploaded to a server of ours. Privacy and Terms links open in the system browser. There are no analytics or tracking SDKs, and the app does not read or write Apple Health in this version.
+
+4. Regional differences
+Features and content are the same in every region. The download price is Free. Paid prices follow the App Store.
+
+5. Regulated or third-party material
+None. This is not a medical, nutrition, or other regulated-industry service. It does not track menstrual health and does not give cycle-based medical guidance. Form cues are general training reminders, not clinical guidance. No licensed third-party video, music, or exercise GIFs are included in this build.
+Privacy Policy: https://samayhuf-star.github.io/app-legal/momentum-women/privacy.html
+Terms of Use: https://samayhuf-star.github.io/app-legal/momentum-women/terms.html
+
+Contact: Samay Vashsht, [phone redacted], samayhuf@gmail.com.
