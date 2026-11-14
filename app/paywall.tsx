@@ -74,7 +74,7 @@ export default function PaywallScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} testID="paywall">
-      <Pressable style={styles.close} onPress={() => router.back()} testID="close-paywall">
+      <Pressable accessibilityRole="button" style={styles.close} onPress={() => router.back()} testID="close-paywall">
         <Text style={styles.closeText}>Close</Text>
       </Pressable>
 
@@ -94,7 +94,7 @@ export default function PaywallScreen() {
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       {plans.map((plan) => (
-        <Pressable
+        <Pressable accessibilityRole="button"
           key={plan.id}
           style={[styles.offer, plan.kind === 'yearly' && styles.offerYear]}
           onPress={() => onBuy(plan)}
@@ -107,17 +107,17 @@ export default function PaywallScreen() {
         </Pressable>
       ))}
 
-      <Pressable onPress={onRestore} disabled={busy} testID="restore">
+      <Pressable accessibilityRole="button" onPress={onRestore} disabled={busy} testID="restore">
         <Text style={styles.restore}>Restore purchases</Text>
       </Pressable>
 
       <Text style={styles.footer}>{renewalDisclosure(hasTrial)}</Text>
       <View style={styles.links}>
-        <Text style={styles.link} onPress={() => Linking.openURL(TERMS_URL)}>Terms</Text>
+        <Text accessibilityRole="link" style={styles.link} onPress={() => Linking.openURL(TERMS_URL)}>Terms</Text>
         <Text style={styles.sep}> · </Text>
-        <Text style={styles.link} onPress={() => Linking.openURL(PRIVACY_URL)}>Privacy</Text>
+        <Text accessibilityRole="link" style={styles.link} onPress={() => Linking.openURL(PRIVACY_URL)}>Privacy</Text>
         <Text style={styles.sep}> · </Text>
-        <Text style={styles.link} onPress={() => Linking.openURL(APPLE_EULA_URL)}>Apple EULA</Text>
+        <Text accessibilityRole="link" style={styles.link} onPress={() => Linking.openURL(APPLE_EULA_URL)}>Apple EULA</Text>
       </View>
     </ScrollView>
   );

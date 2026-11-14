@@ -63,7 +63,7 @@ export default function WorkoutPlayer() {
 
   return (
     <SafeAreaView style={styles.container} testID="workout">
-      <Pressable style={styles.close} onPress={() => router.back()}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Close" style={styles.close} onPress={() => router.back()} testID="close-workout">
         <Text style={styles.closeText}>Close</Text>
       </Pressable>
 
@@ -73,10 +73,10 @@ export default function WorkoutPlayer() {
       <ExerciseMedia id={exercise.id} name={exercise.name} muscle={exercise.category} />
 
       <View style={styles.modeRow}>
-        <Pressable style={[styles.modeBtn, mode === 'timer' && styles.modeActive]} onPress={() => setMode('timer')}>
+        <Pressable accessibilityRole="button" style={[styles.modeBtn, mode === 'timer' && styles.modeActive]} onPress={() => setMode('timer')}>
           <Text style={[styles.modeText, mode === 'timer' && styles.modeTextActive]}>Timer</Text>
         </Pressable>
-        <Pressable style={[styles.modeBtn, mode === 'reps' && styles.modeActive]} onPress={() => setMode('reps')}>
+        <Pressable accessibilityRole="button" style={[styles.modeBtn, mode === 'reps' && styles.modeActive]} onPress={() => setMode('reps')}>
           <Text style={[styles.modeText, mode === 'reps' && styles.modeTextActive]}>Reps</Text>
         </Pressable>
       </View>
@@ -87,21 +87,21 @@ export default function WorkoutPlayer() {
         </Text>
       ) : (
         <View style={styles.repRow}>
-          <Pressable onPress={() => setReps((r) => Math.max(1, r - 1))}>
+          <Pressable accessibilityRole="button" onPress={() => setReps((r) => Math.max(1, r - 1))}>
             <Text style={styles.repBtn}>−</Text>
           </Pressable>
           <Text style={styles.reps}>{reps}</Text>
-          <Pressable onPress={() => setReps((r) => r + 1)}>
+          <Pressable accessibilityRole="button" onPress={() => setReps((r) => r + 1)}>
             <Text style={styles.repBtn}>+</Text>
           </Pressable>
         </View>
       )}
 
       <View style={styles.btnRow}>
-        <Pressable style={styles.skipBtn} onPress={() => setIsRunning(!isRunning)}>
+        <Pressable accessibilityRole="button" style={styles.skipBtn} onPress={() => setIsRunning(!isRunning)}>
           <Text style={styles.skipText}>{isRunning ? 'PAUSE' : 'START'}</Text>
         </Pressable>
-        <Pressable style={styles.nextBtn} onPress={finish}>
+        <Pressable accessibilityRole="button" style={styles.nextBtn} onPress={finish}>
           <Text style={styles.nextText}>{index + 1 < list.length ? 'NEXT' : 'FINISH'}</Text>
         </Pressable>
       </View>

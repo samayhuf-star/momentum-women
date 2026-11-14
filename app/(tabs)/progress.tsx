@@ -1,5 +1,8 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useProgress } from '../../context/ProgressContext';
+
+const TAB_EDGES = ['top', 'left', 'right'] as const;
 
 export default function ProgressScreen() {
   const { streak, totalWorkouts, completedDays, loading } = useProgress();
@@ -9,6 +12,7 @@ export default function ProgressScreen() {
   const adjustedToday = today === 0 ? 6 : today - 1;
 
   return (
+    <SafeAreaView style={styles.safe} edges={TAB_EDGES}>
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Progress</Text>
       <Text style={styles.subtitle}>Track your strength and consistency</Text>
@@ -54,12 +58,14 @@ export default function ProgressScreen() {
         )}
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: '#FFF5F8' },
   container: { flex: 1, backgroundColor: '#FFF5F8' },
-  content: { padding: 24, paddingTop: 60, paddingBottom: 40 },
+  content: { padding: 24, paddingTop: 16, paddingBottom: 40 },
   title: { fontSize: 28, fontWeight: '700', color: '#1A1A1A' },
   subtitle: { fontSize: 16, color: '#666', marginTop: 8, marginBottom: 24 },
   statsRow: { flexDirection: 'row', gap: 12 },

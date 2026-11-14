@@ -1,7 +1,10 @@
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { visibleExercises, categories } from '../../data/exercises';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+
+const TAB_EDGES = ['top', 'left', 'right'] as const;
 
 export default function WorkoutsScreen() {
   const [selected, setSelected] = useState<string | null>(null);
@@ -10,16 +13,17 @@ export default function WorkoutsScreen() {
   const filtered = selected ? visibleExercises.filter((e) => e.category === selected) : visibleExercises;
 
   return (
+    <SafeAreaView style={styles.safe} edges={TAB_EDGES}>
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Library</Text>
       <Text style={styles.subtitle}>Browse exercises and start one at a time</Text>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filters}>
-        <Pressable style={[styles.chip, !selected && styles.chipActive]} onPress={() => setSelected(null)}>
+        <Pressable accessibilityRole="button" style={[styles.chip, !selected && styles.chipActive]} onPress={() => setSelected(null)}>
           <Text style={[styles.chipText, !selected && styles.chipTextActive]}>All</Text>
         </Pressable>
         {categories.map((cat) => (
-          <Pressable
+          <Pressable accessibilityRole="button"
             key={cat}
             style={[styles.chip, selected === cat && styles.chipActive]}
             onPress={() => setSelected(cat)}
@@ -32,7 +36,7 @@ export default function WorkoutsScreen() {
       <Text style={styles.count}>{filtered.length} exercises</Text>
 
       {filtered.map((ex) => (
-        <Pressable key={ex.id} style={styles.card} onPress={() => router.push(`/workout/${ex.id}`)}>
+        <Pressable accessibilityRole="button" key={ex.id} style={styles.card} onPress={() => router.push(`/workout/${ex.id}`)}>
           <View style={styles.cardHeader}>
             <Text style={styles.name}>{ex.name}</Text>
             <Text style={styles.difficulty}>{ex.difficulty}</Text>
@@ -43,12 +47,14 @@ export default function WorkoutsScreen() {
         </Pressable>
       ))}
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: '#FFF5F8' },
   container: { flex: 1, backgroundColor: '#FFF5F8' },
-  content: { padding: 20, paddingTop: 60, paddingBottom: 40 },
+  content: { padding: 20, paddingTop: 16, paddingBottom: 40 },
   title: { fontSize: 28, fontWeight: '700', color: '#1A1A1A' },
   subtitle: { fontSize: 16, color: '#666', marginTop: 4, marginBottom: 16 },
   filters: { marginBottom: 12 },

@@ -31,56 +31,62 @@ final class SimQATests: XCTestCase {
     let app = XCUIApplication()
     app.launch()
 
-    let guest = app.buttons["continue-as-guest"]
-    if guest.waitForExistence(timeout: 8) {
+    // Match by accessibility identifier (RN testID) on any element type, so a
+    // touchable reported as Other instead of Button is still found.
+    func el(_ id: String) -> XCUIElement {
+      app.descendants(matching: .any).matching(identifier: id).firstMatch
+    }
+
+    let guest = el("continue-as-guest")
+    let home = el("home")
+    if guest.waitForExistence(timeout: 15) {
       guest.tap()
       step("guest", true, "tapped Continue as Guest")
     } else {
-      step("guest", true, "already in the app")
+      let inApp = home.exists
+      step("guest", inApp, inApp ? "already in the app" : "neither guest screen nor home found")
     }
 
-    let home = app.otherElements["home"]
     let homeOk = home.waitForExistence(timeout: 10)
     step("home", homeOk, homeOk ? "home visible" : "missing testID home")
     shot("01-home")
     XCTAssertTrue(homeOk)
 
-    let start = app.buttons["start-workout"]
+    let start = el("start-workout")
     let startOk = start.waitForExistence(timeout: 6)
     step("start", startOk, startOk ? "tapped start" : "missing start-workout")
     if startOk { start.tap() }
 
-    let workout = app.otherElements["workout"]
+    let workout = el("workout")
     let workoutOk = workout.waitForExistence(timeout: 8)
-    let detail = app.otherElements["exercise-detail"]
+    let detail = el("exercise-detail")
     let detailOk = detail.waitForExistence(timeout: 4)
     step("workout", workoutOk, workoutOk ? "workout visible" : "missing testID workout")
-    step("exercise-detail", detailOk, detailOk ? "placeholder media visible" : "missing testID exercise-detail")
+    step("exercise-detail", detailOk, detailOk ? "exercise media visible" : "missing testID exercise-detail")
     shot("02-workout")
     XCTAssertTrue(workoutOk)
     XCTAssertTrue(detailOk)
 
-    if app.buttons["Close"].waitForExistence(timeout: 2) {
-      app.buttons["Close"].tap()
-    } else {
-      app.swipeDown()
+    let closeWorkout = el("close-workout")
+    if closeWorkout.waitForExistence(timeout: 2) {
+      closeWorkout.tap()
     }
     _ = home.waitForExistence(timeout: 6)
 
-    let paywallBtn = app.buttons["open-paywall"]
+    let paywallBtn = el("open-paywall")
     let payBtnOk = paywallBtn.waitForExistence(timeout: 6)
     step("open-paywall", payBtnOk, payBtnOk ? "tapped paywall" : "missing open-paywall")
     if payBtnOk { paywallBtn.tap() }
 
-    let paywall = app.otherElements["paywall"]
+    let paywall = el("paywall")
     let payOk = paywall.waitForExistence(timeout: 8)
     step("paywall", payOk, payOk ? "paywall visible" : "missing testID paywall")
     shot("03-paywall")
     XCTAssertTrue(payOk)
 
-    let restore = app.buttons["restore"]
+    let restore = el("restore")
     step("restore", restore.waitForExistence(timeout: 4), "Restore control")
-    let yearly = app.buttons["buy-yearly"]
+    let yearly = el("buy-yearly")
     step("yearly-cta", yearly.waitForExistence(timeout: 4), "yearly plan loaded from StoreKit")
 
     save()

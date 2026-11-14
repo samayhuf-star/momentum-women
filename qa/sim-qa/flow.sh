@@ -2,7 +2,7 @@
 # Momentum flow for .github/workflows/sim-qa.yml.
 # Env from the workflow: UDID, BUNDLE_ID, SCHEME, WORKSPACE, DERIVED_DATA, OUT.
 # Installs the app, then runs MomentumWomenQATests XCUITest: guest launch, home, workout
-# (exercise-detail placeholder), paywall (store prices and trial line), Restore.
+# (exercise-detail media), paywall (store prices and trial line), Restore.
 set -euo pipefail
 : "${UDID:?}" "${BUNDLE_ID:?}" "${SCHEME:?}" "${WORKSPACE:?}" "${DERIVED_DATA:?}" "${OUT:?}"
 mkdir -p "$OUT"

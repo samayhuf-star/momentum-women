@@ -1,7 +1,10 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { usePro } from '../../context/ProContext';
 import { useRouter } from 'expo-router';
+
+const TAB_EDGES = ['top', 'left', 'right'] as const;
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
@@ -14,7 +17,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={TAB_EDGES}>
       <Text style={styles.title}>Profile</Text>
 
       <View style={styles.card}>
@@ -23,23 +26,23 @@ export default function ProfileScreen() {
         <Text style={styles.email}>Progress is saved on this device. There is no account sign-in.</Text>
       </View>
 
-      <Pressable style={styles.proButton} onPress={() => router.push('/paywall')} testID="open-paywall">
+      <Pressable accessibilityRole="button" style={styles.proButton} onPress={() => router.push('/paywall')} testID="open-paywall">
         <Text style={styles.proText}>{isPro ? 'Momentum Pro is active' : 'Unlock Momentum Pro'}</Text>
       </Pressable>
 
-      <Pressable style={styles.creditsButton} onPress={() => router.push('/credits')} testID="open-credits">
+      <Pressable accessibilityRole="button" style={styles.creditsButton} onPress={() => router.push('/credits')} testID="open-credits">
         <Text style={styles.creditsText}>About and Credits</Text>
       </Pressable>
 
-      <Pressable style={styles.logoutButton} onPress={handleLogout}>
+      <Pressable accessibilityRole="button" style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Log Out</Text>
       </Pressable>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFF5F8', padding: 24, paddingTop: 60 },
+  container: { flex: 1, backgroundColor: '#FFF5F8', padding: 24, paddingTop: 16 },
   title: { fontSize: 28, fontWeight: '700', marginBottom: 24 },
   card: { backgroundColor: '#fff', borderRadius: 16, padding: 20, marginBottom: 24 },
   name: { fontSize: 22, fontWeight: '700', color: '#1A1A1A' },

@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'expo-router';
@@ -17,7 +18,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <LinearGradient colors={['#FF6B9D', '#FF8E53']} style={styles.header}>
         <Text style={styles.logo}>Momentum</Text>
         <Text style={styles.tagline}>Women's Workout</Text>
@@ -29,17 +30,17 @@ export default function LoginScreen() {
           Guided workouts with a timer or a rep counter. Progress stays on this device. No account is required.
         </Text>
 
-        <Pressable style={styles.guestButton} onPress={handleGuest} testID="continue-as-guest">
+        <Pressable accessibilityRole="button" style={styles.guestButton} onPress={handleGuest} testID="continue-as-guest">
           <Text style={styles.guestButtonText}>Continue as Guest</Text>
         </Pressable>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFF5F8' },
-  header: { paddingTop: 100, paddingBottom: 60, alignItems: 'center' },
+  header: { paddingTop: 56, paddingBottom: 60, alignItems: 'center' },
   logo: { color: '#fff', fontSize: 42, fontWeight: '800' },
   tagline: { color: 'rgba(255,255,255,0.9)', fontSize: 20, marginTop: 4 },
   content: { flex: 1, padding: 32, justifyContent: 'center' },

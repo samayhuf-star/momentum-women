@@ -7,7 +7,7 @@ export default function CreditsScreen() {
   return (
     <SafeAreaView style={styles.container} testID="credits">
       <ScrollView contentContainerStyle={styles.content}>
-        <Pressable onPress={() => router.back()} testID="credits-back">
+        <Pressable accessibilityRole="button" onPress={() => router.back()} testID="credits-back">
           <Text style={styles.back}>Back</Text>
         </Pressable>
         <Text style={styles.title}>About and Credits</Text>

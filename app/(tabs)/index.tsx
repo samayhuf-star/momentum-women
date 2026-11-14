@@ -1,9 +1,12 @@
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useProgress } from '../../context/ProgressContext';
 import { usePro } from '../../context/ProContext';
 import { visiblePlans as plans } from '../../data/exercises';
+
+const TAB_EDGES = ['top', 'left', 'right'] as const;
 
 export default function TodayScreen() {
   const router = useRouter();
@@ -20,6 +23,7 @@ export default function TodayScreen() {
   };
 
   return (
+    <SafeAreaView style={styles.safe} edges={TAB_EDGES}>
     <ScrollView style={styles.container} contentContainerStyle={styles.content} testID="home">
       <Text style={styles.greeting}>Welcome back</Text>
       <Text style={styles.title}>Today</Text>
@@ -27,7 +31,7 @@ export default function TodayScreen() {
       <View style={styles.card}>
         <Text style={styles.cardTitle}>{todayPlan.name}</Text>
         <Text style={styles.cardSub}>{todayPlan.exerciseIds.length} exercises · {todayPlan.description}</Text>
-        <Pressable style={styles.startBtn} onPress={startToday} testID="start-workout">
+        <Pressable accessibilityRole="button" style={styles.startBtn} onPress={startToday} testID="start-workout">
           <Ionicons name="play" size={18} color="#FF6B9D" />
           <Text style={styles.startText}>Start</Text>
         </Pressable>
@@ -49,30 +53,32 @@ export default function TodayScreen() {
 
       <Text style={styles.section}>Quick actions</Text>
       <View style={styles.actions}>
-        <Pressable style={styles.action} onPress={() => router.push('/(tabs)/workouts')}>
+        <Pressable accessibilityRole="button" style={styles.action} onPress={() => router.push('/(tabs)/workouts')}>
           <Ionicons name="barbell" size={24} color="#FF6B9D" />
           <Text style={styles.actionText}>Browse</Text>
         </Pressable>
-        <Pressable style={styles.action} onPress={() => router.push('/(tabs)/plans')}>
+        <Pressable accessibilityRole="button" style={styles.action} onPress={() => router.push('/(tabs)/plans')}>
           <Ionicons name="calendar" size={24} color="#FF6B9D" />
           <Text style={styles.actionText}>Plans</Text>
         </Pressable>
-        <Pressable style={styles.action} onPress={() => router.push('/(tabs)/progress')}>
+        <Pressable accessibilityRole="button" style={styles.action} onPress={() => router.push('/(tabs)/progress')}>
           <Ionicons name="stats-chart" size={24} color="#FF6B9D" />
           <Text style={styles.actionText}>Progress</Text>
         </Pressable>
       </View>
 
-      <Pressable style={styles.proBtn} onPress={() => router.push('/paywall')} testID="open-paywall">
+      <Pressable accessibilityRole="button" style={styles.proBtn} onPress={() => router.push('/paywall')} testID="open-paywall">
         <Text style={styles.proText}>{isPro ? 'Momentum Pro is active' : 'Unlock Pro'}</Text>
       </Pressable>
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: '#FFF5F8' },
   container: { flex: 1, backgroundColor: '#FFF5F8' },
-  content: { padding: 20, paddingTop: 60, paddingBottom: 40 },
+  content: { padding: 20, paddingTop: 16, paddingBottom: 40 },
   greeting: { fontSize: 16, color: '#666' },
   title: { fontSize: 32, fontWeight: '700', color: '#1A1A1A', marginTop: 4 },
   card: { backgroundColor: '#FF6B9D', borderRadius: 20, padding: 20, marginTop: 24 },
