@@ -22,6 +22,18 @@ final class SimQATests: XCTestCase {
       let url = URL(fileURLWithPath: out).appendingPathComponent("\(name).png")
       try? shot.pngRepresentation.write(to: url)
     }
+    func shotListing(_ name: String) {
+      let dir = URL(fileURLWithPath: out).appendingPathComponent("listing", isDirectory: true)
+      try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+      let shot = XCUIScreen.main.screenshot()
+      try? shot.pngRepresentation.write(to: dir.appendingPathComponent(name))
+    }
+    func tapId(_ id: String, timeout: TimeInterval = 8) -> Bool {
+      let target = el(id)
+      guard target.waitForExistence(timeout: timeout) else { return false }
+      target.tap()
+      return true
+    }
     func save() {
       let url = URL(fileURLWithPath: out).appendingPathComponent("results.json")
       let data = try? JSONSerialization.data(withJSONObject: ["steps": steps], options: [.prettyPrinted])
@@ -50,6 +62,7 @@ final class SimQATests: XCTestCase {
     let homeOk = home.waitForExistence(timeout: 10)
     step("home", homeOk, homeOk ? "home visible" : "missing testID home")
     shot("01-home")
+    shotListing("01-home.png")
     XCTAssertTrue(homeOk)
 
     let start = el("start-workout")
@@ -64,6 +77,7 @@ final class SimQATests: XCTestCase {
     step("workout", workoutOk, workoutOk ? "workout visible" : "missing testID workout")
     step("exercise-detail", detailOk, detailOk ? "exercise media visible" : "missing testID exercise-detail")
     shot("02-workout")
+    shotListing("02-workout.png")
     XCTAssertTrue(workoutOk)
     XCTAssertTrue(detailOk)
 
@@ -71,6 +85,40 @@ final class SimQATests: XCTestCase {
     if closeWorkout.waitForExistence(timeout: 2) {
       closeWorkout.tap()
     }
+    _ = home.waitForExistence(timeout: 6)
+
+    let libraryTab = tapId("workouts-tab")
+    let library = el("library")
+    let libraryOk = library.waitForExistence(timeout: 8)
+    step("library", libraryTab && libraryOk, libraryOk ? "library visible" : "missing library")
+    let pushUp = app.staticTexts["Push-Up"]
+    var scrolls = 0
+    while libraryOk && !pushUp.exists && scrolls < 8 {
+      app.swipeUp()
+      scrolls += 1
+    }
+    let pushOk = pushUp.waitForExistence(timeout: 2)
+    if pushOk { pushUp.tap() }
+    let single = el("workout")
+    let singleOk = single.waitForExistence(timeout: 8)
+    step("exercise-detail-screen", pushOk && singleOk, singleOk ? "Push-Up open" : "Push-Up not opened")
+    if singleOk { shotListing("03-exercise-detail.png") }
+    if el("close-workout").waitForExistence(timeout: 2) { el("close-workout").tap() }
+    _ = library.waitForExistence(timeout: 6)
+
+    let progressTab = tapId("progress-tab")
+    let progress = el("progress")
+    let progressOk = progress.waitForExistence(timeout: 8)
+    step("progress", progressTab && progressOk, progressOk ? "progress visible" : "missing progress")
+    if progressOk { shotListing("04-progress.png") }
+
+    let plansTab = tapId("plans-tab")
+    let plans = el("plans")
+    let plansOk = plans.waitForExistence(timeout: 8)
+    step("plans", plansTab && plansOk, plansOk ? "plans visible" : "missing plans")
+    if plansOk { shotListing("05-plans.png") }
+
+    _ = tapId("today-tab")
     _ = home.waitForExistence(timeout: 6)
 
     let paywallBtn = el("open-paywall")

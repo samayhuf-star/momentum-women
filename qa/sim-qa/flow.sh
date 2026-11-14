@@ -2,7 +2,8 @@
 # Momentum flow for .github/workflows/sim-qa.yml.
 # Env from the workflow: UDID, BUNDLE_ID, SCHEME, WORKSPACE, DERIVED_DATA, OUT.
 # Installs the app, then runs MomentumWomenQATests XCUITest: guest launch, home, workout
-# (exercise-detail media), paywall (store prices and trial line), Restore.
+# (exercise-detail media), the five listing screens under $OUT/listing, paywall, Restore.
+# When LISTING_SIZE is 1290x2796 (6.9" simulator), those five PNGs must be that size.
 set -euo pipefail
 : "${UDID:?}" "${BUNDLE_ID:?}" "${SCHEME:?}" "${WORKSPACE:?}" "${DERIVED_DATA:?}" "${OUT:?}"
 mkdir -p "$OUT"
@@ -44,5 +45,36 @@ print("\n".join(lines))
 failed = [s for s in steps if not s.get("pass")]
 if not steps or failed or rc != 0:
     raise SystemExit(rc if rc else 1)
+PY
+
+python3 - "$OUT" <<'PY'
+import os, struct, sys
+out = sys.argv[1]
+want = os.environ.get("LISTING_SIZE", "").strip()
+if not want:
+    raise SystemExit(0)
+want_w, want_h = (int(part) for part in want.split("x"))
+names = [
+    "01-home.png",
+    "02-workout.png",
+    "03-exercise-detail.png",
+    "04-progress.png",
+    "05-plans.png",
+]
+bad = []
+for name in names:
+    path = os.path.join(out, "listing", name)
+    if not os.path.exists(path):
+        bad.append(name + " missing")
+        continue
+    with open(path, "rb") as handle:
+        header = handle.read(24)
+    width, height = struct.unpack(">II", header[16:24])
+    if (width, height) != (want_w, want_h):
+        bad.append(f"{name} is {width}x{height}")
+if bad:
+    print("listing screenshot check failed:", "; ".join(bad))
+    raise SystemExit(1)
+print(f"listing screenshots {want}: ok")
 PY
 exit $?

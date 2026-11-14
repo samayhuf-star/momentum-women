@@ -23,7 +23,7 @@ export default function PlansScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={TAB_EDGES}>
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} testID="plans">
       <Text style={styles.title}>Plans</Text>
       <Text style={styles.subtitle}>Sessions built from the exercise library</Text>
       {plans.map((plan) => {

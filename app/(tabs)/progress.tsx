@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useProgress } from '../../context/ProgressContext';
+import { formatProgressDay } from '../../lib/progressDate';
 
 const TAB_EDGES = ['top', 'left', 'right'] as const;
 
@@ -13,7 +14,7 @@ export default function ProgressScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={TAB_EDGES}>
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} testID="progress">
       <Text style={styles.title}>Progress</Text>
       <Text style={styles.subtitle}>Track your strength and consistency</Text>
 
@@ -52,7 +53,7 @@ export default function ProgressScreen() {
         ) : (
           completedDays.slice(-5).reverse().map((d) => (
             <Text key={d} style={styles.metric}>
-              {d}
+              {formatProgressDay(d)}
             </Text>
           ))
         )}
