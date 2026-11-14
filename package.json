@@ -33,7 +33,7 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test lib/progressDate.test.ts lib/sessionMeta.test.ts"
+    "test": "node --experimental-strip-types --test lib/progressDate.test.ts lib/sessionMeta.test.ts lib/manageSubscriptions.test.ts"
   },
   "private": true
 }

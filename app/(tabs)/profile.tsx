@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { usePro } from '../../context/ProContext';
 import { useRouter } from 'expo-router';
+import { manageSubscription } from '../../lib/purchases';
 
 const TAB_EDGES = ['top', 'left', 'right'] as const;
 
@@ -30,6 +31,12 @@ export default function ProfileScreen() {
         <Text style={styles.proText}>{isPro ? 'Momentum Pro is active' : 'Unlock Momentum Pro'}</Text>
       </Pressable>
 
+      {isPro ? (
+        <Pressable accessibilityRole="button" style={styles.manageButton} onPress={manageSubscription} testID="manage-subscription">
+          <Text style={styles.manageText}>Manage Subscription</Text>
+        </Pressable>
+      ) : null}
+
       <Pressable accessibilityRole="button" style={styles.creditsButton} onPress={() => router.push('/credits')} testID="open-credits">
         <Text style={styles.creditsText}>About and Credits</Text>
       </Pressable>
@@ -48,8 +55,10 @@ const styles = StyleSheet.create({
   name: { fontSize: 22, fontWeight: '700', color: '#1A1A1A' },
   badge: { marginTop: 8, color: '#FF6B9D', fontWeight: '600', fontSize: 14 },
   email: { marginTop: 6, color: '#888', fontSize: 14, lineHeight: 20 },
-  proButton: { backgroundColor: '#1A1A1A', borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginBottom: 12 },
+  proButton: { backgroundColor: '#1A1A1A', borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginBottom: 12, minHeight: 44 },
   proText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  manageButton: { backgroundColor: '#fff', borderRadius: 12, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 12, minHeight: 44, borderWidth: 2, borderColor: '#FF6B9D' },
+  manageText: { color: '#1A1A1A', fontWeight: '700', fontSize: 16 },
   creditsButton: { backgroundColor: '#fff', borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginBottom: 12, borderWidth: 1, borderColor: '#eee' },
   creditsText: { color: '#1A1A1A', fontWeight: '700', fontSize: 16 },
   logoutButton: { backgroundColor: '#fff', borderRadius: 12, paddingVertical: 16, alignItems: 'center', borderWidth: 1, borderColor: '#FF6B9D' },

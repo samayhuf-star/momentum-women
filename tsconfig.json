@@ -11,6 +11,7 @@
     "android",
     "ios",
     "lib/progressDate.test.ts",
-    "lib/sessionMeta.test.ts"
+    "lib/sessionMeta.test.ts",
+    "lib/manageSubscriptions.test.ts"
   ]
 }
