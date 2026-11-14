@@ -1,8 +1,8 @@
 # Listing draft — Momentum – Women's Workout
 
-Draft for App Store Connect. Do not paste yet. No App Store Connect writes were made for this draft.
+Draft for App Store Connect. Do not paste from this file by hand if App Publisher Bot is loading `docs/store/asc-fields.json`. No App Store Connect writes were made.
 
-Checked 14 Nov 2026. Character counts are JavaScript string lengths (the en dash in the name counts as one character).
+Checked 14 Nov 2026. Character counts are JavaScript string lengths. The en dash in the name is one character.
 
 ## Identity
 
@@ -10,12 +10,14 @@ Checked 14 Nov 2026. Character counts are JavaScript string lengths (the en dash
 | --- | --- | --- |
 | Name | Momentum – Women's Workout | 26 (limit 30) |
 | Bundle ID | `com.samayvashsht.momentumwomen` | |
-| SKU / ASC | Already on the team. `eas.json` records `ascAppId` `6834676214`. This draft does not change it. | |
+| ASC app | `6834676214` in `eas.json`. This draft does not change it. | |
 | Subtitle | Home and gym workout plans | 26 (limit 30) |
 | Primary category | Health & Fitness | |
-| Secondary category (optional) | Lifestyle | |
+| Secondary category | Lifestyle | |
 | Copyright | 2026 Samay Vashsht | |
-| Age rating to confirm | 4+. No unrestricted web content, no user-generated content, no HealthKit in this version. | |
+| Age rating | 4+ | |
+
+`ios.buildNumber` is 2. `ios.supportsTablet` is false.
 
 ## Promo text
 
@@ -27,7 +29,7 @@ Guided sessions for home or the gym, with a timer or a rep counter and form cues
 
 Momentum – Women's Workout is a training app for guided sessions on iPhone, at home or in the gym.
 
-Open Today for the beginner session, or browse the exercise library. Each move has a short form cue and a still. Train with a timer or a rep counter. Your streak and completed workouts stay on this iPhone.
+Today opens on the next session, with the length and the exercise count, and a week view of workouts saved on this iPhone. Each move has a short form cue and a still. Train with a timer or a rep counter, and see the next move before you continue.
 
 The beginner plan, the workout player, the library, and progress are free. Momentum Pro adds the Full Body and Upper Body plans.
 
@@ -51,36 +53,35 @@ fitness,gym,training,exercise,strength,timer,reps,home,plans,glutes
 
 ## URLs
 
-Checked with `curl -sS -o /dev/null -w "%{http_code}" -L` on 14 Nov 2026. Each returned **200**.
+Checked with `curl -L` on 14 Nov 2026.
 
 | Role | URL | Status |
 | --- | --- | --- |
 | Privacy policy | https://samayhuf-star.github.io/app-legal/momentum-women/privacy.html | 200 |
 | Support | https://samayhuf-star.github.io/app-legal/momentum-women/support.html | 200 |
-| Terms (also linked in the app) | https://samayhuf-star.github.io/app-legal/momentum-women/terms.html | 200 |
-
-The same privacy, terms, and support URLs are in `app/credits.tsx`. The paywall links terms, privacy, and the Apple standard EULA (`https://www.apple.com/legal/internet-services/itunes/dev/stdeula/`, also 200).
+| Terms | https://samayhuf-star.github.io/app-legal/momentum-women/terms.html | 200 |
+| Marketing | Same as support. No separate marketing page is published (`/momentum-women/` returned 404). | 200 |
 
 ## What's New (1.0)
 
 First release. Today view, guided workouts with a timer or reps, on-device progress, and optional Momentum Pro.
 
-## Pricing check (no code change)
+## Pricing
 
-Locked price: free download, 7-day free trial, then $2.99 a month, $19.99 a year, or $39.99 lifetime.
+Free download. Then $2.99 a month or $19.99 a year, each with a 7-day free trial, or $39.99 lifetime with no trial.
 
-| Product | ID in `lib/pro.ts` and `qa/MomentumWomen.storekit` | StoreKit config |
+| Product | ID | StoreKit file |
 | --- | --- | --- |
-| Monthly | `com.samayvashsht.momentumwomen.monthly` | $2.99, period P1M, introductory offer free for P1W |
-| Yearly | `com.samayvashsht.momentumwomen.yearly` | $19.99, period P1Y, introductory offer free for P1W |
-| Lifetime | `com.samayvashsht.momentumwomen.lifetime` | $39.99 non-consumable, no introductory offer |
+| Monthly | `com.samayvashsht.momentumwomen.monthly` | $2.99, P1M, free intro P1W |
+| Yearly | `com.samayvashsht.momentumwomen.yearly` | $19.99, P1Y, free intro P1W |
+| Lifetime | `com.samayvashsht.momentumwomen.lifetime` | $39.99 non-consumable, no intro |
 
-No mismatch. The paywall does not hardcode dollar amounts. It shows the store `displayPrice`. Trial wording is added only when the store reports an eligible trial. Lifetime never gets trial wording (`lib/introOffer.ts`).
-
-One copy detail, not a price mismatch: `ctaText` says "7 days free" whenever `trialDays` is greater than 0, while `planLine` uses the day count the store returns. The StoreKit file's intro offer is one week, so both lines say 7 days. If the App Store intro offer were ever a different length, the button line would still say 7. Pricing logic was not changed.
+The paywall shows the store price. It does not hardcode the dollar amount. Trial wording is added only when the store reports a trial. Lifetime never shows a trial.
 
 ## Screenshots
 
-Five frames at 1290 × 2796 in `docs/store/screenshots/ios-6.9/`. See `docs/store/screenshots/README.md`.
+- 6.9 inch, 1290 × 2796: `docs/store/screenshots/ios-6.9/`
+- 6.5 inch, 1284 × 2778: `docs/store/screenshots/ios-6.5/`
+- IAP review, 1290 × 2796: `docs/store/screenshots/iap-review/`
 
-`release/build2` sets `ios.supportsTablet` to `false` and `ios.buildNumber` to `2`. This set is the iPhone 6.9" set. An iPad set is not required for that build. This branch does not change `app.json`.
+See `docs/store/screenshots/README.md`.

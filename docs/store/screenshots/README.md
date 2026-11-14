@@ -1,39 +1,38 @@
-# App Store screenshots (iPhone 6.9")
+# Final App Store screenshots
 
-Draft set for Momentum – Women's Workout. Do not upload until Samay accepts this set. These are not a substitute for a device pass of safe areas or StoreKit (see `docs/store/qa-checklist-build1.md`).
+Rendered 14 Nov 2026 from `main` after the build 2 fixes and the UI redesign. Linux has no iOS Simulator, so each frame is the real app screen from Expo web, then a caption band and a 9:41 status bar were added for the store sizes.
 
-Pixel size for every file: **1290 × 2796** (portrait, the 6.9" slot). No caption band: the whole frame is the app screen.
+`ios.supportsTablet` is false, so there is no iPad set.
 
-| File | Screen | What it shows |
+## 6.9 inch — 1290 × 2796
+
+`docs/store/screenshots/ios-6.9/`
+
+| File | Screen | Caption |
 | --- | --- | --- |
-| `ios-6.9/01-home.png` | Today | Beginner Strength, Start, on-device stats (1 workout, 1 streak), quick actions, Unlock Pro |
-| `ios-6.9/02-workout.png` | Workout player | Beginner session, exercise 1 of 6, Goblet Squat still, form cue, timer at 00:40 |
-| `ios-6.9/03-exercise-detail.png` | Exercise detail | Push-Up opened from the library (1 of 1), still, form cue, timer |
-| `ios-6.9/04-progress.png` | Progress | Day streak 1, workouts 1, Saturday marked, recent day "Nov 14" |
-| `ios-6.9/05-plans.png` | Plans | Beginner Strength (free), Full Body · Pro, Upper Body · Pro |
+| `01-today.png` | Today | Start today's session |
+| `02-plans.png` | Plans | Choose a plan |
+| `03-workout.png` | Workout player | Follow the move |
+| `04-progress.png` | Progress | Your streak, on this iPhone |
+| `05-exercise.png` | Exercise detail | See the move first |
 
-Not included, on purpose: permission prompts, Profile, Credits, the paywall, and Restore.
+## 6.5 inch — 1284 × 2778
 
-## How they were made
+`docs/store/screenshots/ios-6.5/`
 
-Captured 14 Nov 2026 on Linux. There is no iOS Simulator here, so the screens are the real React Native screens running under Expo web.
+The same five files. Each 6.9 inch frame was scaled to 1284 × 2778.
 
-1. `npm ci`, then `npx tsc --noEmit` (exit 0).
-2. `npx expo start --web --port 8081` (Expo SDK 58, Metro).
-3. Headless Chrome, viewport 430 × 932 CSS pixels at `deviceScaleFactor` 3, which is 1290 × 2796.
-4. Continue as Guest, then drive the same controls the app ships (`continue-as-guest`, `start-workout`, `close-workout`, and the Plans / Workouts / Progress tabs).
-5. Finish the beginner session so Today and Progress show the values `completeWorkout` wrote (`@momentum_women_progress`: streak 1, total 1, day `2026-11-14`). That date is the UTC day the session was finished. The week row highlights Saturday because 14 Nov 2026 is a Saturday.
-6. On the workout shot, the capture waited until the in-app crossfade had moved to the end pose of Goblet Squat.
+## IAP review — 1290 × 2796
 
-The stills are the files the app already requires. Goblet Squat and Push-Up are Open Exercise Illustrations (CC0 1.0), from the pin in `assets/exercise-media/LICENSE-SOURCES.md`. No stock art and no generated imagery.
+`docs/store/screenshots/iap-review/`
 
-The one CC BY-SA 4.0 still that ships is Pilates Hundred (`pilates-hundred-hold.jpg`, Helisusa, Wikimedia Commons). It is credited on the Credits screen and is not in this set.
+| File | What is highlighted |
+| --- | --- |
+| `paywall.png` | Yearly, the plan the paywall outlines by default |
+| `paywall-monthly.png` | Monthly, $2.99 |
+| `paywall-yearly.png` | Yearly, $19.99 with a 7-day trial |
+| `paywall-lifetime.png` | Lifetime, $39.99 |
 
-`04-progress.png` was recaptured from the build 2 date formatting (`formatProgressDay`: short month, numeric day, year only when it is not the current year). The other four frames were left as they were. The tab bar already uses Ionicons, and build 2 does not change those icons, so frames that only show the tab bar were not regenerated.
+These use the paywall screen from `main`. This machine cannot load StoreKit, so the three prices shown are the ones in `qa/MomentumWomen.storekit`: monthly $2.99, yearly $19.99 with a 7-day free trial, lifetime $39.99. The lines are the paywall's own trial and price text. Restore, Terms, and Privacy are on the screen. No paywall code change was committed.
 
-## Web-only limits
-
-- `react-native-web` is not a dependency of this repo. It was installed in the local `node_modules` for this capture and was not committed.
-- `expo-iap` has no web native module. The dev client showed "Cannot find native module 'ExpoIap'". That overlay was removed in the browser before each shot. It is a web limitation. The iOS binary uses StoreKit.
-- Web safe-area insets are 0, so these frames have no iOS status bar or home indicator. On a phone the same screens sit below the status bar (`SafeAreaView` is already in the screens).
-- `Alert.alert` in react-native-web is a no-op, so the "Workout complete" alert did not appear and the player did not dismiss itself. Progress was still saved. The player was closed with the app's Close control.
+Illustrations are the Open Exercise Illustrations stills the app already ships. Captions do not make medical or weight-loss claims.
