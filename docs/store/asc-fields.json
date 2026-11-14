@@ -73,7 +73,8 @@
       "docs/store/screenshots/iap-review/paywall-monthly.png",
       "docs/store/screenshots/iap-review/paywall-yearly.png",
       "docs/store/screenshots/iap-review/paywall-lifetime.png"
-    ]
+    ],
+    "note": "This app has no custom generator. The fifth frame is the exercise detail, which is the real library detail screen."
   },
   "inAppPurchases": [
     {
@@ -123,5 +124,11 @@
     "supportUrl": 200,
     "termsUrl": 200,
     "marketingUrl": 200
+  },
+  "privacyUrl": "https://samayhuf-star.github.io/app-legal/momentum-women/privacy.html",
+  "iapReviewShotsByProductId": {
+    "com.samayvashsht.momentumwomen.monthly": "docs/store/screenshots/iap-review/paywall-monthly.png",
+    "com.samayvashsht.momentumwomen.yearly": "docs/store/screenshots/iap-review/paywall-yearly.png",
+    "com.samayvashsht.momentumwomen.lifetime": "docs/store/screenshots/iap-review/paywall-lifetime.png"
   }
 }

@@ -35,4 +35,4 @@ The same five files. Each 6.9 inch frame was scaled to 1284 × 2778.
 
 These use the paywall screen from `main`. This machine cannot load StoreKit, so the three prices shown are the ones in `qa/MomentumWomen.storekit`: monthly $2.99, yearly $19.99 with a 7-day free trial, lifetime $39.99. The lines are the paywall's own trial and price text. Restore, Terms, and Privacy are on the screen. No paywall code change was committed.
 
-Illustrations are the Open Exercise Illustrations stills the app already ships. Captions do not make medical or weight-loss claims.
+Illustrations are the Open Exercise Illustrations stills the app already ships. The Pilates Hundred still (CC BY-SA, Helisusa) is credited in the app and is not in these frames. This app has no custom generator. The fifth frame is the exercise detail, which is the library detail screen in the redesigned UI. Captions do not make medical or weight-loss claims.
