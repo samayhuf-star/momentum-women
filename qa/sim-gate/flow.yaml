@@ -1,0 +1,357 @@
+appId: com.samayvashsht.momentumwomen
+---
+# Fresh install. There is no multi-step onboarding; Welcome is the entry.
+# Maestro grants no extra permission map here so a system prompt can appear.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- takeScreenshot: 01-fresh-launch
+
+- runFlow:
+    when:
+      visible: "Don’t Allow|Don't Allow|Allow Once|Not Now"
+    commands:
+      - takeScreenshot: 03-permission-prompt
+      - tapOn:
+          text: "Don’t Allow|Don't Allow|Not Now"
+          optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "continue-as-guest"
+    timeout: 45000
+- takeScreenshot: 02-onboarding
+
+- runFlow:
+    when:
+      visible: "Don’t Allow|Don't Allow|Allow Once"
+    commands:
+      - takeScreenshot: 03-permission-prompt
+      - tapOn:
+          text: "Don’t Allow|Don't Allow"
+          optional: true
+
+- tapOn:
+    id: "continue-as-guest"
+- runFlow:
+    when:
+      visible:
+        id: "continue-as-guest"
+    commands:
+      - tapOn:
+          id: "continue-as-guest"
+- extendedWaitUntil:
+    visible:
+      id: "home"
+    timeout: 20000
+- takeScreenshot: 04-today
+- assertVisible:
+    text: "Day 1"
+    optional: true
+- assertNotVisible:
+    text: "Unlock Pro"
+    optional: true
+
+- scrollUntilVisible:
+    element: "This week"
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+- takeScreenshot: 05-today-week
+- scrollUntilVisible:
+    element: "Last 30 days"
+    direction: DOWN
+    timeout: 15000
+    visibilityPercentage: 60
+- takeScreenshot: 06-today-month
+
+- tapOn:
+    id: "plans-tab"
+- extendedWaitUntil:
+    visible:
+      id: "plans"
+    timeout: 10000
+- takeScreenshot: 07-plans
+- scrollUntilVisible:
+    element: "Upper Body"
+    direction: DOWN
+    timeout: 10000
+    optional: true
+- takeScreenshot: 08-plans-lower
+
+- tapOn:
+    id: "workouts-tab"
+- extendedWaitUntil:
+    visible:
+      id: "library"
+    timeout: 10000
+- takeScreenshot: 09-library
+- scrollUntilVisible:
+    element: "Push-Up"
+    direction: DOWN
+    timeout: 90000
+    speed: 80
+    visibilityPercentage: 40
+- takeScreenshot: 11-library-pushup
+- tapOn: "Push-Up"
+- extendedWaitUntil:
+    visible:
+      id: "workout"
+    timeout: 10000
+- takeScreenshot: 12-exercise
+- assertVisible:
+    text: "Exercise 1 of 1"
+    optional: true
+- scrollUntilVisible:
+    element: "Reps"
+    direction: DOWN
+    timeout: 15000
+    optional: true
+- tapOn: "Reps"
+- takeScreenshot: 13-exercise-reps
+- tapOn:
+    text: "More reps"
+    optional: true
+- tapOn:
+    text: "+"
+    optional: true
+- takeScreenshot: 14-exercise-reps-plus
+- scrollUntilVisible:
+    element: "Previous"
+    direction: DOWN
+    timeout: 15000
+    optional: true
+- tapOn:
+    text: "Previous"
+    optional: true
+- takeScreenshot: 15-exercise-previous
+- tapOn:
+    id: "close-workout"
+
+- tapOn:
+    id: "progress-tab"
+- extendedWaitUntil:
+    visible:
+      id: "progress"
+    timeout: 10000
+- takeScreenshot: 16-progress-empty
+- assertVisible:
+    text: "Complete a workout to start tracking."
+    optional: true
+
+- tapOn:
+    id: "today-tab"
+- extendedWaitUntil:
+    visible:
+      id: "start-workout"
+    timeout: 10000
+- tapOn:
+    id: "start-workout"
+- extendedWaitUntil:
+    visible:
+      id: "workout"
+    timeout: 10000
+- takeScreenshot: 17-workout
+- assertVisible:
+    text: "Exercise 1 of 6"
+    optional: true
+- assertVisible:
+    text: "Next up"
+    optional: true
+- scrollUntilVisible:
+    element:
+      text: "^Start$"
+    direction: DOWN
+    timeout: 15000
+- tapOn:
+    text: "^Start$"
+- takeScreenshot: 18-workout-running
+- tapOn:
+    text: "Pause"
+    optional: true
+- takeScreenshot: 19-workout-paused
+- scrollUntilVisible:
+    element:
+      text: "^Next$"
+    direction: DOWN
+    timeout: 15000
+    optional: true
+- tapOn:
+    text: "^Next$"
+- takeScreenshot: 20-workout-next
+- tapOn:
+    id: "close-workout"
+
+- tapOn: "Profile"
+- extendedWaitUntil:
+    visible: "Guest mode"
+    timeout: 10000
+- takeScreenshot: 21-profile
+- assertNotVisible:
+    text: "Manage Subscription"
+    optional: true
+
+- tapOn:
+    id: "open-credits"
+- extendedWaitUntil:
+    visible:
+      id: "credits"
+    timeout: 10000
+- takeScreenshot: 22-credits
+- scroll
+- takeScreenshot: 23-credits-scrolled
+- tapOn:
+    id: "credits-back"
+
+- tapOn:
+    id: "open-paywall"
+- extendedWaitUntil:
+    visible:
+      id: "paywall"
+    timeout: 15000
+- takeScreenshot: 24-paywall
+- extendedWaitUntil:
+    visible: "Yearly|Plans unavailable|Pro is already active|Restore purchases"
+    timeout: 25000
+- scrollUntilVisible:
+    element: "Restore purchases"
+    direction: DOWN
+    timeout: 20000
+    visibilityPercentage: 40
+- takeScreenshot: 25-paywall-offers
+
+- runFlow:
+    when:
+      visible:
+        id: "buy-yearly"
+    commands:
+      - tapOn:
+          id: "buy-yearly"
+      - takeScreenshot: 26-purchase-sheet
+      - tapOn:
+          text: "Subscribe|Purchase|Confirm"
+          optional: true
+      - takeScreenshot: 27-purchase-result
+      - tapOn:
+          text: "OK"
+          optional: true
+      - tapOn:
+          text: "Cancel|Close"
+          optional: true
+
+- runFlow:
+    when:
+      visible:
+        id: "manage-subscription"
+    commands:
+      - takeScreenshot: 28-paywall-manage
+      - tapOn:
+          id: "manage-subscription"
+      - takeScreenshot: 29-manage-subscription
+      - launchApp:
+          stopApp: false
+
+- scrollUntilVisible:
+    element:
+      id: "restore"
+    direction: DOWN
+    timeout: 15000
+    optional: true
+- tapOn:
+    id: "restore"
+    optional: true
+- takeScreenshot: 30-restore
+- tapOn:
+    text: "OK|Close"
+    optional: true
+- tapOn:
+    id: "close-paywall"
+    optional: true
+
+- tapOn:
+    id: "plans-tab"
+- extendedWaitUntil:
+    visible:
+      id: "plans"
+    timeout: 10000
+- tapOn:
+    id: "plan-full-body"
+- takeScreenshot: 31-locked-plan
+- tapOn:
+    id: "close-paywall"
+    optional: true
+- tapOn:
+    id: "close-workout"
+    optional: true
+
+- tapOn:
+    id: "workouts-tab"
+- extendedWaitUntil:
+    visible:
+      id: "library"
+    timeout: 10000
+- scrollUntilVisible:
+    element: "Push-Up"
+    direction: DOWN
+    timeout: 90000
+    speed: 80
+    visibilityPercentage: 40
+- tapOn: "Push-Up"
+- extendedWaitUntil:
+    visible:
+      id: "workout"
+    timeout: 10000
+- scrollUntilVisible:
+    element: "Finish"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Finish"
+- takeScreenshot: 32-finish-alert
+- tapOn:
+    text: "OK"
+    optional: true
+
+- tapOn:
+    id: "progress-tab"
+- extendedWaitUntil:
+    visible:
+      id: "progress"
+    timeout: 10000
+- takeScreenshot: 33-progress-filled
+
+- tapOn: "Profile"
+- extendedWaitUntil:
+    visible: "Guest mode|Momentum Pro is active"
+    timeout: 10000
+- takeScreenshot: 34-profile-after-workout
+- runFlow:
+    when:
+      visible:
+        id: "manage-subscription"
+    commands:
+      - tapOn:
+          id: "manage-subscription"
+      - takeScreenshot: 35-profile-manage-subscription
+      - launchApp:
+          stopApp: false
+
+- scrollUntilVisible:
+    element: "Log Out"
+    direction: DOWN
+    timeout: 10000
+    optional: true
+- takeScreenshot: 36-before-logout
+- tapOn: "Log Out"
+- extendedWaitUntil:
+    visible:
+      id: "continue-as-guest"
+    timeout: 15000
+- takeScreenshot: 37-after-logout
+
+- tapOn:
+    id: "continue-as-guest"
+- extendedWaitUntil:
+    visible:
+      id: "home"
+    timeout: 15000
+- takeScreenshot: 38-today-after-login
