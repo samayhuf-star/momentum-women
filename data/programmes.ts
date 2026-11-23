@@ -1,4 +1,4 @@
-import { visibleExercises, type Exercise } from './exercises';
+import { visibleExercises, type Exercise } from './exercises.ts';
 import type { PhotoKey } from '../lib/photos';
 
 export type Move = { id: string; sets: number; reps?: number; secs?: number };
