@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Body, Heading, Photo, Pill } from '../../components/ui';
+import { Body, Heading, Photo, Pill, PrimaryButton } from '../../components/ui';
 import { photos } from '../../lib/photos';
 import { color } from '../../lib/theme';
 
@@ -20,7 +20,7 @@ export default function Intro() {
   const next = () => (i < SLIDES.length - 1 ? setI(i + 1) : done());
 
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel="Next" onPress={next} style={{ flex: 1, backgroundColor: color.bg }} testID="intro">
+    <Pressable accessible={false} onPress={next} style={{ flex: 1, backgroundColor: color.bg }} testID="intro">
       <Photo source={slide.photo} label={slide.alt} style={{ flex: 2 }} />
       <SafeAreaView edges={['top']} style={{ position: 'absolute', top: 0, left: 20, right: 20, gap: 12 }}>
         <View style={{ flexDirection: 'row', gap: 6, paddingTop: 8 }}>
@@ -35,6 +35,9 @@ export default function Intro() {
       <SafeAreaView edges={['bottom']} style={{ flex: 1, paddingHorizontal: 28, paddingTop: 24, gap: 12, alignItems: 'center' }}>
         <Heading size={26} style={{ textAlign: 'center' }}>{slide.title}</Heading>
         <Body size={16} style={{ textAlign: 'center' }}>{slide.text}</Body>
+        <View style={{ flex: 1 }} />
+        <PrimaryButton label={i < SLIDES.length - 1 ? 'Next' : 'Find my programme'} onPress={next} testID="intro-next" style={{ alignSelf: 'stretch' }} />
+        <View style={{ height: 8 }} />
       </SafeAreaView>
     </Pressable>
   );
