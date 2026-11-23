@@ -1,72 +1,33 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { color, font } from '../../lib/theme';
+
+const TABS: [string, string, keyof typeof Ionicons.glyphMap][] = [
+  ['index', 'Workout', 'barbell-outline'],
+  ['plan', 'Plan', 'calendar-outline'],
+  ['progress', 'Progress', 'trending-up-outline'],
+  ['profile', 'Profile', 'person-outline'],
+];
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#FF6B9D',
-        tabBarInactiveTintColor: '#A0A0A0',
-        tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopWidth: 0,
-          elevation: 0,
-          height: 90,
-          paddingBottom: 20,
-          paddingTop: 10,
-        },
         headerShown: false,
+        tabBarActiveTintColor: color.accent,
+        tabBarInactiveTintColor: color.muted,
+        tabBarLabelStyle: { fontFamily: font.semi, fontSize: 11 },
+        tabBarStyle: { backgroundColor: color.card, borderTopWidth: 0, height: 88, paddingTop: 8 },
+        sceneStyle: { backgroundColor: color.bg },
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Today',
-          tabBarButtonTestID: 'today-tab',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color as string} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="plans"
-        options={{
-          title: 'Plans',
-          tabBarButtonTestID: 'plans-tab',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar" size={size} color={color as string} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="workouts"
-        options={{
-          title: 'Workouts',
-          tabBarButtonTestID: 'workouts-tab',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="barbell" size={size} color={color as string} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="progress"
-        options={{
-          title: 'Progress',
-          tabBarButtonTestID: 'progress-tab',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="stats-chart" size={size} color={color as string} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color as string} />
-          ),
-        }}
-      />
+      {TABS.map(([name, title, icon]) => (
+        <Tabs.Screen
+          key={name}
+          name={name}
+          options={{ title, tabBarButtonTestID: `${title.toLowerCase()}-tab`, tabBarIcon: ({ color: c, size }) => <Ionicons name={icon} size={size} color={c as string} /> }}
+        />
+      ))}
     </Tabs>
   );
 }

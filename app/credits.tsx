@@ -27,6 +27,10 @@ export default function CreditsScreen() {
           Commons, licensed under CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/).
           https://commons.wikimedia.org/wiki/File:Pilates-hundred-sata.jpg. Used unmodified.
         </Text>
+        <Text style={styles.heading}>Photographs</Text>
+        <Text style={styles.body}>
+          The photographs of people in this app are AI-generated images of models. They do not show real coaches.
+        </Text>
         <Text style={styles.heading}>Privacy and terms</Text>
         <Text style={styles.body}>
           Privacy policy: https://samayhuf-star.github.io/app-legal/momentum-women/privacy.html
@@ -43,10 +47,10 @@ export default function CreditsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFF5F8' },
+  container: { flex: 1, backgroundColor: '#140D12' },
   content: { padding: 20, paddingBottom: 40 },
-  back: { color: '#FF6B9D', fontSize: 16, fontWeight: '600', marginBottom: 16 },
-  title: { fontSize: 28, fontWeight: '700', color: '#1A1A1A', marginBottom: 16 },
-  heading: { fontSize: 18, fontWeight: '700', color: '#1A1A1A', marginTop: 20, marginBottom: 8 },
-  body: { color: '#666', fontSize: 15, lineHeight: 22, marginBottom: 8 },
+  back: { color: '#BCA6FF', fontSize: 16, fontWeight: '600', marginBottom: 16 },
+  title: { fontSize: 28, fontWeight: '700', color: '#FFF6F2', marginBottom: 16 },
+  heading: { fontSize: 18, fontWeight: '700', color: '#FFF6F2', marginTop: 20, marginBottom: 8 },
+  body: { color: '#CDBDC4', fontSize: 15, lineHeight: 22, marginBottom: 8 },
 });

@@ -5,11 +5,12 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": false,
+      "usesAppleSignIn": true,
       "bundleIdentifier": "com.samayvashsht.momentumwomen",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -17,18 +18,20 @@
     "android": {
       "package": "com.samayvashsht.momentumwomen",
       "adaptiveIcon": {
-        "backgroundColor": "#FFF5F8"
+        "backgroundColor": "#140D12"
       }
     },
     "plugins": [
       "expo-router",
       "expo-iap",
+      "expo-apple-authentication",
+      "expo-font",
       [
         "expo-splash-screen",
         {
           "image": "./assets/splash.png",
           "resizeMode": "contain",
-          "backgroundColor": "#FFF5F8"
+          "backgroundColor": "#140D12"
         }
       ]
     ],

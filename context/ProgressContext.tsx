@@ -1,71 +1,88 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { dayKey } from '../lib/week';
 
-type ProgressContextType = {
+export type JournalEntry = { day: string; reps: number; weight: number };
+export type LastWorkout = { key: string; day: string; seconds: number; moves: number; sets: number };
+
+type Stored = {
   completedDays: string[];
+  completedSessions: string[];
+  minutesByDay: Record<string, number>;
   streak: number;
   totalWorkouts: number;
   minutes: number;
-  loading: boolean;
-  completeWorkout: (plannedSeconds?: number) => Promise<void>;
+  journal: Record<string, JournalEntry[]>;
+  last: LastWorkout | null;
 };
 
-const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
+type ProgressContextType = Stored & {
+  loading: boolean;
+  completeWorkout: (plannedSeconds?: number, detail?: { key: string; moves: number; sets: number }) => Promise<void>;
+  logSet: (exerciseId: string, reps: number, weight: number) => Promise<void>;
+  resetProgress: () => Promise<void>;
+};
 
+const EMPTY: Stored = { completedDays: [], completedSessions: [], minutesByDay: {}, streak: 0, totalWorkouts: 0, minutes: 0, journal: {}, last: null };
+const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
 const STORAGE_KEY = '@momentum_women_progress';
 
+function previousDay(key: string): string {
+  const [y, m, d] = key.split('-').map(Number);
+  return dayKey(new Date(y, m - 1, d - 1));
+}
+
 export function ProgressProvider({ children }: { children: React.ReactNode }) {
-  const [completedDays, setCompletedDays] = useState<string[]>([]);
-  const [streak, setStreak] = useState(0);
-  const [totalWorkouts, setTotalWorkouts] = useState(0);
-  const [minutes, setMinutes] = useState(0);
+  const [state, setState] = useState<Stored>(EMPTY);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    load();
+    (async () => {
+      try {
+        const data = await AsyncStorage.getItem(STORAGE_KEY);
+        if (data) setState({ ...EMPTY, ...JSON.parse(data) });
+      } catch (e) {
+        console.log('Progress load error', e);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
-  const load = async () => {
-    try {
-      const data = await AsyncStorage.getItem(STORAGE_KEY);
-      if (data) {
-        const p = JSON.parse(data);
-        setCompletedDays(p.completedDays || []);
-        setStreak(p.streak || 0);
-        setTotalWorkouts(p.totalWorkouts || 0);
-        setMinutes(p.minutes || 0);
-      }
-    } catch (e) {
-      console.log('Progress load error', e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const save = async (next: { completedDays: string[]; streak: number; totalWorkouts: number; minutes: number }) => {
+  const commit = async (next: Stored) => {
+    setState(next);
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   };
 
-  const completeWorkout = async (plannedSeconds = 0) => {
-    const today = new Date().toISOString().split('T')[0];
-    if (completedDays.includes(today)) return;
-
-    const nextDays = [...completedDays, today];
-    const nextStreak = streak + 1;
-    const nextTotal = totalWorkouts + 1;
+  const completeWorkout: ProgressContextType['completeWorkout'] = async (plannedSeconds = 0, detail) => {
+    const today = dayKey();
     const added = plannedSeconds > 0 ? Math.max(1, Math.round(plannedSeconds / 60)) : 0;
-    const nextMinutes = minutes + added;
+    const firstToday = !state.completedDays.includes(today);
+    const continues = state.completedDays.includes(previousDay(today));
+    await commit({
+      ...state,
+      completedDays: firstToday ? [...state.completedDays, today] : state.completedDays,
+      completedSessions: detail && !state.completedSessions.includes(detail.key) ? [...state.completedSessions, detail.key] : state.completedSessions,
+      minutesByDay: { ...state.minutesByDay, [today]: (state.minutesByDay[today] ?? 0) + added },
+      streak: firstToday ? (continues ? state.streak + 1 : 1) : state.streak,
+      totalWorkouts: state.totalWorkouts + 1,
+      minutes: state.minutes + added,
+      last: detail ? { ...detail, day: today, seconds: plannedSeconds } : state.last,
+    });
+  };
 
-    setCompletedDays(nextDays);
-    setStreak(nextStreak);
-    setTotalWorkouts(nextTotal);
-    setMinutes(nextMinutes);
+  const logSet: ProgressContextType['logSet'] = async (exerciseId, reps, weight) => {
+    const list = [...(state.journal[exerciseId] ?? []), { day: dayKey(), reps, weight }].slice(-50);
+    await commit({ ...state, journal: { ...state.journal, [exerciseId]: list } });
+  };
 
-    await save({ completedDays: nextDays, streak: nextStreak, totalWorkouts: nextTotal, minutes: nextMinutes });
+  const resetProgress = async () => {
+    setState(EMPTY);
+    await AsyncStorage.removeItem(STORAGE_KEY);
   };
 
   return (
-    <ProgressContext.Provider value={{ completedDays, streak, totalWorkouts, minutes, loading, completeWorkout }}>
+    <ProgressContext.Provider value={{ ...state, loading, completeWorkout, logSet, resetProgress }}>
       {children}
     </ProgressContext.Provider>
   );
@@ -73,8 +90,6 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
 
 export function useProgress() {
   const context = useContext(ProgressContext);
-  if (!context) {
-    throw new Error('useProgress must be used within ProgressProvider');
-  }
+  if (!context) throw new Error('useProgress must be used within ProgressProvider');
   return context;
 }

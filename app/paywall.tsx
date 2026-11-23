@@ -1,164 +1,76 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Alert,
-  Linking,
-  ScrollView,
-  ActivityIndicator,
-} from 'react-native';
+import { useState } from 'react';
+import { Linking, Pressable, ScrollView, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { buy, loadPlans, manageSubscription, restore, type Plan } from '../lib/purchases';
-import { ctaText, planLine, renewalDisclosure } from '../lib/introOffer';
-import { APPLE_EULA_URL, FREE_FEATURES, PRIVACY_URL, PRO_FEATURES, TERMS_URL } from '../lib/pro';
-import { usePro } from '../context/ProContext';
+import { CheckLine, IconButton, PrimaryButton, Tick } from '../components/ui';
+import { usePlan } from '../context/PlanContext';
+import { PRIVACY_URL, TERMS_URL } from '../lib/pro';
+import { color, font } from '../lib/theme';
 
-export default function PaywallScreen() {
+/**
+ * Layout preview of the paywall. Prices are the standard plans and are not read from the store here.
+ * The shipping paywall is RevenueCat's, wired in at the payments checkpoint; no purchase happens on this screen.
+ */
+const PLANS = [
+  { id: 'annual', name: 'Annual', sub: '7 days free, then $29.99 a year', right: '$2.50/mo', badge: 'Best value' },
+  { id: 'monthly', name: 'Monthly', sub: '7 days free, then $5.99 a month', right: '$5.99/mo' },
+  { id: 'weekly', name: 'Weekly', sub: '7 days free, then $2.99 a week', right: '$2.99/wk' },
+  { id: 'lifetime', name: 'Lifetime', sub: 'One payment of $39.99', right: 'Once' },
+];
+
+export default function Paywall() {
   const router = useRouter();
-  const { isPro, refresh } = usePro();
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState(false);
+  const plan = usePlan();
+  const [picked, setPicked] = useState('annual');
 
-  const reload = async () => {
-    setLoading(true);
-    const result = await loadPlans();
-    setPlans(result.plans);
-    setError(result.error);
-    setLoading(false);
+  const leave = async () => {
+    if (!plan.onboarded) await plan.finishOnboarding();
+    router.replace('/(tabs)');
   };
-
-  useEffect(() => {
-    reload();
-  }, []);
-
-  const onBuy = async (plan: Plan) => {
-    if (busy) return;
-    setBusy(true);
-    const result = await buy(plan);
-    setBusy(false);
-    if (result === 'purchased') {
-      await refresh();
-      Alert.alert('Unlocked', 'Momentum Pro is now active on this Apple ID.', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
-    } else if (result === 'cancelled') {
-      return;
-    } else if (result === 'pending') {
-      Alert.alert('Pending', 'This purchase is waiting for approval. Pro will unlock when it completes.');
-    } else {
-      Alert.alert('Purchase failed', 'Please try again. If you already paid, use Restore.');
-    }
-  };
-
-  const onRestore = async () => {
-    if (busy) return;
-    setBusy(true);
-    const ok = await restore();
-    setBusy(false);
-    if (ok) {
-      await refresh();
-      Alert.alert('Restored', 'Your Momentum Pro purchase is active.', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
-    } else {
-      Alert.alert('No purchase found', 'No Momentum Pro purchase was found for this Apple ID.');
-    }
-  };
-
-  const hasTrial = plans.some((p) => p.trialDays && p.trialDays > 0);
-  const canBuy = plans.length > 0 && !busy;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} testID="paywall">
-      <Pressable accessibilityRole="button" style={styles.close} onPress={() => router.back()} testID="close-paywall">
-        <Text style={styles.closeText}>Close</Text>
-      </Pressable>
-
-      <Text style={styles.title}>Momentum Pro</Text>
-      <Text style={styles.subtitle}>Unlock every training plan</Text>
-
-      {isPro ? <Text style={styles.active}>Pro is already active on this Apple ID.</Text> : null}
-
-      {FREE_FEATURES.map((item) => (
-        <Text key={item} style={styles.benefit}>Free: {item}</Text>
-      ))}
-      {PRO_FEATURES.map((item) => (
-        <Text key={item} style={styles.benefit}>Pro: {item}</Text>
-      ))}
-
-      {loading ? <ActivityIndicator color="#FF6B9D" style={{ marginTop: 24 }} /> : null}
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-
-      {plans.map((plan) => (
-        <Pressable accessibilityRole="button"
-          key={plan.id}
-          style={[styles.offer, plan.kind === 'yearly' && styles.offerYear]}
-          onPress={() => onBuy(plan)}
-          disabled={!canBuy}
-          testID={`buy-${plan.kind}`}
-        >
-          <Text style={styles.offerLabel}>{plan.label}</Text>
-          <Text style={styles.offerLine}>{planLine(plan)}</Text>
-          <Text style={styles.cta}>{ctaText(plan)}</Text>
-        </Pressable>
-      ))}
-
-      {isPro ? (
-        <Pressable accessibilityRole="button" style={styles.manage} onPress={manageSubscription} testID="manage-subscription">
-          <Text style={styles.manageText}>Manage Subscription</Text>
-        </Pressable>
-      ) : null}
-
-      <Pressable accessibilityRole="button" onPress={onRestore} disabled={busy} testID="restore">
-        <Text style={styles.restore}>Restore purchases</Text>
-      </Pressable>
-
-      <Text style={styles.footer}>{renewalDisclosure(hasTrial)}</Text>
-      <View style={styles.links}>
-        <Text accessibilityRole="link" style={styles.link} onPress={() => Linking.openURL(TERMS_URL)}>Terms</Text>
-        <Text style={styles.sep}> · </Text>
-        <Text accessibilityRole="link" style={styles.link} onPress={() => Linking.openURL(PRIVACY_URL)}>Privacy</Text>
-        <Text style={styles.sep}> · </Text>
-        <Text accessibilityRole="link" style={styles.link} onPress={() => Linking.openURL(APPLE_EULA_URL)}>Apple EULA</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: color.bg }} testID="paywall">
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, gap: 14, paddingBottom: 12 }}>
+        <IconButton name="close" label="Close" bg="transparent" onPress={leave} testID="paywall-close" />
+        <Text accessibilityRole="header" style={{ fontFamily: font.head, fontSize: 28, lineHeight: 32, color: color.text }}>Get stronger, without planning a single workout.</Text>
+        <View style={{ gap: 8 }}>
+          <CheckLine>A plan for every week, day by day</CheckLine>
+          <CheckLine>Form cues and timers for every move</CheckLine>
+          <CheckLine>Journal to track reps and weights</CheckLine>
+          <CheckLine>Switch programme whenever you like</CheckLine>
+        </View>
+        <View style={{ gap: 8, paddingTop: 4 }}>
+          {PLANS.map((p) => {
+            const on = picked === p.id;
+            return (
+              <Pressable key={p.id} accessibilityRole="radio" accessibilityState={{ selected: on }} accessibilityLabel={`${p.name}. ${p.sub}`} testID={`plan-${p.id}`} onPress={() => setPicked(p.id)} style={{ minHeight: 60, borderRadius: 14, borderWidth: on ? 2 : 1.5, borderColor: on ? color.accent : color.line, backgroundColor: color.card, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <Tick on={on} size={22} />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Text style={{ fontFamily: font.semi, fontSize: 16, color: color.text }}>{p.name}</Text>
+                    {p.badge ? (
+                      <View style={{ height: 20, paddingHorizontal: 8, borderRadius: 10, backgroundColor: color.accent, justifyContent: 'center' }}>
+                        <Text style={{ fontFamily: font.semi, fontSize: 11, color: color.onAccent }}>{p.badge}</Text>
+                      </View>
+                    ) : null}
+                  </View>
+                  <Text style={{ fontFamily: font.body, fontSize: 12, color: color.muted }}>{p.sub}</Text>
+                </View>
+                <Text style={{ fontFamily: font.medium, fontSize: 13, color: color.muted }}>{p.right}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </ScrollView>
+      <View style={{ paddingHorizontal: 20, paddingBottom: 8, gap: 8 }}>
+        <Text style={{ textAlign: 'center', fontFamily: font.body, fontSize: 13, color: color.muted }}>Cancel any time in the App Store</Text>
+        <PrimaryButton testID="paywall-start" label={picked === 'lifetime' ? 'Continue' : 'Start 7-day free trial'} onPress={() => router.replace(picked === 'lifetime' ? '/plan-active' : '/started')} />
+        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 18 }}>
+          <Text accessibilityRole="button" testID="paywall-restore" onPress={leave} style={{ fontFamily: font.semi, fontSize: 13, color: color.muted, paddingVertical: 12 }}>Restore purchase</Text>
+          <Text accessibilityRole="link" onPress={() => Linking.openURL(TERMS_URL)} style={{ fontFamily: font.semi, fontSize: 13, color: color.muted, paddingVertical: 12 }}>Terms</Text>
+          <Text accessibilityRole="link" onPress={() => Linking.openURL(PRIVACY_URL)} style={{ fontFamily: font.semi, fontSize: 13, color: color.muted, paddingVertical: 12 }}>Privacy</Text>
+        </View>
       </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFF5F8' },
-  content: { padding: 20, paddingTop: 60, paddingBottom: 40 },
-  close: { alignSelf: 'flex-end', padding: 8 },
-  closeText: { fontSize: 16, color: '#FF6B9D', fontWeight: '600' },
-  title: { fontSize: 32, fontWeight: '700', textAlign: 'center', marginTop: 8, color: '#1A1A1A' },
-  subtitle: { textAlign: 'center', color: '#666', marginTop: 8, marginBottom: 16 },
-  active: { textAlign: 'center', color: '#FF6B9D', marginBottom: 12 },
-  benefit: { fontSize: 15, marginVertical: 4, color: '#1A1A1A' },
-  error: { color: '#b91c1c', marginTop: 16, textAlign: 'center' },
-  offer: { backgroundColor: '#fff', borderRadius: 16, padding: 16, marginTop: 12, alignItems: 'center' },
-  offerYear: { borderWidth: 2, borderColor: '#FF6B9D' },
-  offerLabel: { color: '#666', fontWeight: '600' },
-  offerLine: { color: '#1A1A1A', fontSize: 16, marginTop: 6, textAlign: 'center' },
-  cta: { color: '#FF6B9D', fontWeight: '700', marginTop: 8 },
-  manage: {
-    minHeight: 44,
-    marginTop: 20,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#FF6B9D',
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-  },
-  manageText: { color: '#1A1A1A', fontWeight: '700', fontSize: 16 },
-  restore: { textAlign: 'center', color: '#FF6B9D', marginTop: 20, fontWeight: '600' },
-  footer: { textAlign: 'center', color: '#888', marginTop: 16, fontSize: 12, lineHeight: 18 },
-  links: { flexDirection: 'row', justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' },
-  link: { color: '#FF6B9D', fontSize: 13 },
-  sep: { color: '#888' },
-});

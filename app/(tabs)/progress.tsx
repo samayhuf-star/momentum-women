@@ -1,50 +1,69 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Body, Heading } from '../../components/ui';
 import { useProgress } from '../../context/ProgressContext';
-import { formatProgressDay } from '../../lib/progressDate';
-import StreakRing from '../../components/StreakRing';
-import WeekStrip from '../../components/WeekStrip';
-import { color, space, type } from '../../lib/theme';
+import { exerciseById } from '../../data/programmes';
+import { DAY_SHORT, dayKey, weekDates } from '../../lib/week';
+import { color, font } from '../../lib/theme';
 
-const TAB_EDGES = ['top', 'left', 'right'] as const;
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <View style={{ flex: 1, borderRadius: 16, backgroundColor: color.card, padding: 14, gap: 4 }}>
+      <Text style={{ fontFamily: font.head, fontSize: 28, color: color.text }}>{value}</Text>
+      <Text style={{ fontFamily: font.body, fontSize: 12, color: color.muted }}>{label}</Text>
+    </View>
+  );
+}
 
-export default function ProgressScreen() {
-  const { streak, totalWorkouts, completedDays, minutes, loading } = useProgress();
+export default function Progress() {
+  const p = useProgress();
+  const dates = weekDates();
+  const perDay = dates.map((d) => p.minutesByDay[dayKey(d)] ?? 0);
+  const thisWeek = dates.filter((d) => p.completedDays.includes(dayKey(d))).length;
+  const top = Math.max(1, ...perDay);
+
+  const bests = Object.entries(p.journal)
+    .map(([id, entries]) => {
+      const best = entries.reduce((a, b) => (b.weight > a.weight || (b.weight === a.weight && b.reps > a.reps) ? b : a), entries[0]);
+      return { id, name: exerciseById(id)?.name ?? id, best, count: entries.length };
+    })
+    .filter((b) => b.best)
+    .sort((a, b) => b.best.weight - a.best.weight)
+    .slice(0, 6);
 
   return (
-    <SafeAreaView style={styles.safe} edges={TAB_EDGES}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.content} testID="progress">
-        <Text style={styles.title} accessibilityRole="header">Progress</Text>
-        <Text style={styles.subtitle}>Track your strength and consistency</Text>
-
-        <View style={styles.hero}>
-          <StreakRing completedDays={completedDays} streak={loading ? 0 : streak} />
-          <View style={styles.stats}>
-            <View style={styles.stat}>
-              <Text style={styles.statNum}>{loading ? '-' : totalWorkouts}</Text>
-              <Text style={styles.statLabel}>Workouts</Text>
-            </View>
-            <View style={styles.stat}>
-              <Text style={styles.statNum}>{loading ? '-' : minutes}</Text>
-              <Text style={styles.statLabel}>Minutes</Text>
-            </View>
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: color.bg }} testID="progress">
+      <ScrollView contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 24 }}>
+        <Heading size={30} style={{ paddingTop: 12 }}>Progress</Heading>
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          <Stat value={String(thisWeek)} label="Workouts this week" />
+          <Stat value={String(p.streak)} label="Day streak" />
+          <Stat value={String(p.minutes)} label="Minutes trained" />
+        </View>
+        <View style={{ borderRadius: 16, backgroundColor: color.card, padding: 16, gap: 14 }}>
+          <Text style={{ fontFamily: font.semi, fontSize: 15, color: color.text }}>Minutes per day</Text>
+          <View style={{ height: 120, flexDirection: 'row', alignItems: 'flex-end', gap: 4 }} accessible accessibilityLabel={`Minutes this week: ${perDay.map((m, i) => `${DAY_SHORT[i]} ${m}`).join(', ')}`}>
+            {perDay.map((m, i) => (
+              <View key={i} style={{ flex: 1, alignItems: 'center', gap: 6 }}>
+                <View style={{ width: 22, height: m > 0 ? Math.max(8, Math.round((m / top) * 90)) : 6, borderRadius: 6, backgroundColor: m > 0 ? color.accent : color.raised }} />
+                <Text style={{ fontFamily: font.semi, fontSize: 11, color: color.muted }}>{DAY_SHORT[i][0]}</Text>
+              </View>
+            ))}
           </View>
         </View>
-
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>This week</Text>
-          <WeekStrip completedDays={completedDays} size={40} />
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Recent</Text>
-          {completedDays.length === 0 ? (
-            <Text style={styles.hint}>Complete a workout to start tracking.</Text>
+        <View>
+          <Text style={{ fontFamily: font.semi, fontSize: 15, color: color.text, paddingBottom: 4 }}>Personal bests</Text>
+          {bests.length === 0 ? (
+            <Body size={14} testID="progress-empty">Log reps and weight during a workout and your bests show up here.</Body>
           ) : (
-            completedDays.slice(-5).reverse().map((day) => (
-              <Text key={day} style={styles.metric}>
-                {formatProgressDay(day)}
-              </Text>
+            bests.map((b) => (
+              <View key={b.id} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: color.line }}>
+                <View style={{ gap: 2 }}>
+                  <Text style={{ fontFamily: font.semi, fontSize: 15, color: color.text }}>{b.name}</Text>
+                  <Text style={{ fontFamily: font.body, fontSize: 12, color: color.muted }}>{b.count} set{b.count === 1 ? '' : 's'} logged</Text>
+                </View>
+                <Text style={{ fontFamily: font.semi, fontSize: 15, color: color.accent }}>{b.best.weight > 0 ? `${b.best.weight} kg × ${b.best.reps}` : `${b.best.reps} reps`}</Text>
+              </View>
             ))
           )}
         </View>
@@ -52,27 +71,3 @@ export default function ProgressScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: color.bg },
-  container: { flex: 1, backgroundColor: color.bg },
-  content: { padding: space.xl, paddingTop: space.lg, paddingBottom: space.xxl },
-  title: { fontSize: type.display, fontWeight: '800', color: color.ink },
-  subtitle: { fontSize: type.body, color: color.muted, marginTop: space.sm, marginBottom: space.xl, lineHeight: 24 },
-  hero: {
-    backgroundColor: color.card,
-    borderRadius: 24,
-    padding: space.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.md,
-  },
-  stats: { flex: 1, gap: space.md },
-  stat: { backgroundColor: color.bg, borderRadius: 16, padding: space.md },
-  statNum: { color: color.ink, fontSize: type.headline, fontWeight: '800' },
-  statLabel: { color: color.muted, marginTop: space.xs, fontSize: type.caption, fontWeight: '600' },
-  card: { backgroundColor: color.card, marginTop: space.lg, padding: space.lg, borderRadius: 20 },
-  cardTitle: { color: color.ink, fontSize: type.headline, fontWeight: '800', marginBottom: space.md },
-  metric: { color: color.ink, fontSize: type.body, marginVertical: space.xs },
-  hint: { color: color.muted, fontSize: type.label, lineHeight: 22 },
-});

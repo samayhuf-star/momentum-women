@@ -11,6 +11,7 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   loginAsGuest: () => Promise<void>;
+  loginWithApple: (id: string, name: string | null) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -49,13 +50,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(guest);
   };
 
+  const loginWithApple = async (id: string, name: string | null) => {
+    const next: User = { id: 'apple-' + id, name: name || 'Member', isGuest: false };
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    setUser(next);
+  };
+
   const logout = async () => {
     await AsyncStorage.removeItem(STORAGE_KEY);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginAsGuest, logout }}>
+    <AuthContext.Provider value={{ user, loading, loginAsGuest, loginWithApple, logout }}>
       {children}
     </AuthContext.Provider>
   );
