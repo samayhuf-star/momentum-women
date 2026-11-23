@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { Heading, IconButton } from '../components/ui';
 import Thumb from '../components/Thumb';
 import { categories, visibleExercises } from '../data/exercises';
+import { hasMedia } from '../lib/exerciseMediaMap';
 import { color, font } from '../lib/theme';
 
 export default function Library() {
@@ -18,7 +19,7 @@ export default function Library() {
         {categories.map((c) => (
           <View key={c} style={{ gap: 12 }}>
             <Heading size={18} style={{ paddingTop: 8, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: color.line }}>{c}</Heading>
-            {visibleExercises.filter((e) => e.category === c).map((e) => (
+            {visibleExercises.filter((e) => hasMedia(e.id) && e.category === c).map((e) => (
               <View key={e.id} style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
                 <Thumb id={e.id} name={e.name} />
                 <View style={{ flex: 1, gap: 3 }}>

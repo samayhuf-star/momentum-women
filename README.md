@@ -19,4 +19,4 @@ npx expo start
 - `npm run typecheck`
 - `npm run lint` (same as typecheck)
 
-Exercise stills in `assets/exercise-media/` are the files listed in `assets/exercise-media/LICENSE-SOURCES.md`. They are Open Exercise Illustrations (CC0 1.0), plus one Wikimedia Commons photograph, Pilates Hundred by Helisusa (CC BY-SA 4.0). Exercises without a matching still are hidden and are not shown. Do not add files under `assets/gifs/`.
+Exercise start and end illustrations in `assets/exercise-media-women/` are AI-generated (one two-panel image per move, split into start and end). Exercises without an illustration are hidden from the library. Do not add files under `assets/gifs/`.
