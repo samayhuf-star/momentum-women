@@ -33,7 +33,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#140D12"
         }
-      ]
+      ],
+      "expo-image"
     ],
     "scheme": "momentum-women",
     "extra": {

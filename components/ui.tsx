@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, Pressable, StyleSheet, Text, View, type ImageSourcePropType, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
+import { Image, type ImageSource } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { color, font, hit } from '../lib/theme';
 
@@ -59,10 +60,10 @@ export function IconButton({ name, label, onPress, testID, tint = color.text, bg
   );
 }
 
-export function Photo({ source, style, label }: { source: ImageSourcePropType; style?: StyleProp<ViewStyle>; label: string }) {
+export function Photo({ source, style, label, position = 'top' }: { source: ImageSource | number; style?: StyleProp<ViewStyle>; label: string; position?: 'top' | 'center' }) {
   return (
     <View style={[{ overflow: 'hidden', backgroundColor: color.raised }, style]}>
-      <Image source={source} accessibilityLabel={label} resizeMode="cover" style={StyleSheet.absoluteFill as any} />
+      <Image source={source} accessibilityLabel={label} contentFit="cover" contentPosition={position} style={{ width: '100%', height: '100%' }} />
     </View>
   );
 }
