@@ -142,7 +142,7 @@ export default function Player() {
           </View>
         ) : null}
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-          <Text style={{ fontFamily: font.head, fontSize: 60, lineHeight: 62, color: color.text }} testID="player-count">{timed ? formatClock(left) : `${reps} reps`}</Text>
+          <Text numberOfLines={1} adjustsFontSizeToFit style={{ flexShrink: 1, marginRight: 12, fontFamily: font.head, fontSize: timed ? 60 : 44, lineHeight: timed ? 62 : 48, color: color.text }} testID="player-count">{timed ? formatClock(left) : `${reps} reps`}</Text>
           {timed ? (
             <Pressable accessibilityRole="button" accessibilityLabel={paused ? 'Resume' : 'Pause'} testID="player-pause" onPress={() => setPaused((p) => !p)} style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: color.text, alignItems: 'center', justifyContent: 'center' }}>
               <Ionicons name={paused ? 'play' : 'pause'} size={26} color={color.onAccent} />
