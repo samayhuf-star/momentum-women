@@ -37,7 +37,7 @@ export default function Player() {
   const [reps, setReps] = useState(steps[0]?.move.reps ?? 0);
   const [weight, setWeight] = useState(0);
   const [journal, setJournal] = useState(false);
-  const logged = useRef(0);
+  const doneSteps = useRef<number[]>([]);
   const finished = useRef(false);
 
   const step = steps[index];
@@ -46,7 +46,8 @@ export default function Player() {
   const finish = async () => {
     if (finished.current || !session) return;
     finished.current = true;
-    await completeWorkout(elapsed, { key: session.key, moves: new Set(steps.map((s) => s.move.id)).size, sets: steps.length });
+    const done = doneSteps.current;
+    await completeWorkout(elapsed, { key: session.key, moves: new Set(done.map((n) => steps[n].move.id)).size, sets: done.length });
     router.replace({ pathname: '/workout/done', params: { id: session.key } });
   };
 
@@ -62,9 +63,10 @@ export default function Player() {
   };
 
   const next = async () => {
+    // A timed move ended early with this button counts as skipped; a reps move counts as done.
     if (step && !timed) {
+      doneSteps.current.push(index);
       await logSet(step.move.id, reps, weight);
-      logged.current += 1;
     }
     goTo(index + 1);
   };
@@ -79,7 +81,10 @@ export default function Player() {
   }, [paused, timed, step]);
 
   useEffect(() => {
-    if (timed && left === 0 && step) goTo(index + 1);
+    if (timed && left === 0 && step) {
+      doneSteps.current.push(index);
+      goTo(index + 1);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [left, timed]);
 
@@ -125,7 +130,7 @@ export default function Player() {
       </View>
 
       <View style={{ flex: 1, paddingHorizontal: 20, justifyContent: 'center' }}>
-        <ExerciseMedia id={step.exercise.id} name={step.exercise.name} muscle={step.exercise.muscles[0]} testID="player-media" />
+        <ExerciseMedia id={step.exercise.id} name={step.exercise.name} muscle={step.exercise.muscles[0]} testID="player-media" dark />
         <Text style={{ fontFamily: font.body, fontSize: 14, lineHeight: 20, color: color.muted, textAlign: 'center', paddingTop: 10 }}>{step.exercise.description}</Text>
       </View>
 

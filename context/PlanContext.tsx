@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { dayKey, mondayOf } from '../lib/week';
 
@@ -41,7 +41,12 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
     })();
   }, []);
 
-  const commit = async (next: PlanState) => {
+  // Two saves can run back to back in one handler, so read the latest state from a ref, not the render closure.
+  const latest = useRef(state);
+  latest.current = state;
+  const commit = async (patch: Partial<PlanState>) => {
+    const next = { ...latest.current, ...patch };
+    latest.current = next;
     setState(next);
     await AsyncStorage.setItem(KEY, JSON.stringify(next));
   };
@@ -49,11 +54,12 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
   const value: PlanContextType = {
     ...state,
     loading,
-    setFilters: (styles, length) => setState((s) => ({ ...s, styles, length })),
-    chooseProgramme: (id) => commit({ ...state, programmeId: id, startKey: dayKey(mondayOf()) }),
-    setReminders: (on) => commit({ ...state, reminders: on }),
-    finishOnboarding: () => commit({ ...state, onboarded: true }),
+    setFilters: (styles, length) => { commit({ styles, length }); },
+    chooseProgramme: (id) => commit({ programmeId: id, startKey: dayKey(mondayOf()) }),
+    setReminders: (on) => commit({ reminders: on }),
+    finishOnboarding: () => commit({ onboarded: true }),
     reset: async () => {
+      latest.current = EMPTY;
       setState(EMPTY);
       await AsyncStorage.removeItem(KEY);
     },

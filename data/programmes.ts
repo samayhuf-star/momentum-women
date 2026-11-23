@@ -19,13 +19,13 @@ export type Programme = {
   tagline: string;
   description: string;
   styles: string[];
-  length: 20 | 30 | 45;
+  length: number;
   photo: PhotoKey;
   weeks: Day[][];
 };
 
 export const STYLES = ['Strength basics', 'Pilates strength', 'Glutes and legs', 'Core', 'Bodyweight only', 'Dumbbells'] as const;
-export const LENGTHS = [20, 30, 45] as const;
+export const LENGTHS = [20, 30] as const;
 export const WEEKS = 4;
 
 type T = [string, number, number, ('s' | 'r')?];
@@ -50,10 +50,10 @@ function equipmentOf(blocks: Block[]): string {
   return kinds.size ? [...kinds].join(' · ') : 'Bodyweight';
 }
 
-/** Rough length: 3 seconds a rep, plus 20 seconds of changeover per set. */
+/** Rough length: 4 seconds a rep, plus 40 seconds of rest and changeover per set. */
 export function sessionMinutes(blocks: Block[]): number {
   let seconds = 0;
-  blocks.forEach((b) => b.moves.forEach((m) => { seconds += m.sets * ((m.secs ?? (m.reps ?? 10) * 3) + 20); }));
+  blocks.forEach((b) => b.moves.forEach((m) => { seconds += m.sets * ((m.secs ?? (m.reps ?? 10) * 4) + 40); }));
   return Math.max(5, Math.round(seconds / 60));
 }
 
@@ -83,7 +83,7 @@ function build(programmeId: string, week: number, day: number, t: Template): Ses
 }
 
 function programme(
-  meta: Omit<Programme, 'weeks'>,
+  meta: Omit<Programme, 'weeks' | 'length'>,
   templates: Template[],
   pattern: (number | null)[]
 ): Programme {
@@ -97,12 +97,15 @@ function programme(
       )
     );
   }
-  return { ...meta, weeks };
+  // The length shown for a programme is the average of its week 1 sessions, rounded to the nearest 10 minutes.
+  const first = weeks[0].flatMap((d) => (d.rest ? [] : [d.session.minutes]));
+  const average = first.reduce((a, b) => a + b, 0) / Math.max(1, first.length);
+  return { ...meta, length: Math.max(10, Math.round(average / 10) * 10), weeks };
 }
 
 export const programmes: Programme[] = [
   programme(
-    { id: 'sculpt', name: 'Sculpt', tagline: 'Pilates and strength', description: 'Pilates and strength sessions for a lean, strong body. Beginner friendly.', styles: ['Pilates strength', 'Dumbbells'], length: 30, photo: 'card' },
+    { id: 'sculpt', name: 'Sculpt', tagline: 'Pilates and strength', description: 'Pilates and strength sessions for a lean, strong body. Beginner friendly.', styles: ['Pilates strength', 'Dumbbells'], photo: 'card' },
     [
       { title: 'Full body sculpt', focus: 'Full body', photo: 'press', blocks: [{ name: 'Squat and row', moves: [['goblet-squat', 3, 12], ['row', 3, 12], ['glute-bridge', 3, 15]] }, { name: 'Press and core', moves: [['shoulder-press', 3, 10], ['dead-bug', 3, 10], ['plank', 3, 30, 's']] }] },
       { title: 'Glutes and core', focus: 'Lower body', photo: 'catcow', blocks: [{ name: 'Glutes', moves: [['hip-thrust', 3, 12], ['curtsy-lunge', 3, 10], ['fire-hydrant', 3, 15]] }, { name: 'Pilates core', moves: [['pilates-hundred', 2, 40, 's'], ['leg-raises', 3, 12], ['side-plank', 2, 30, 's']] }] },
@@ -112,7 +115,7 @@ export const programmes: Programme[] = [
     [0, 1, 2, null, 3, 0, null]
   ),
   programme(
-    { id: 'basics', name: 'Strength basics', tagline: 'Three days a week', description: 'The main lifts, three days a week, with plenty of rest. A good place to start.', styles: ['Strength basics', 'Dumbbells'], length: 30, photo: 'welcome' },
+    { id: 'basics', name: 'Strength basics', tagline: 'Three days a week', description: 'The main lifts, three days a week, with plenty of rest. A good place to start.', styles: ['Strength basics', 'Dumbbells'], photo: 'welcome' },
     [
       { title: 'Lower body basics', focus: 'Lower body', photo: 'welcome', blocks: [{ name: 'Legs', moves: [['goblet-squat', 3, 10], ['rdl', 3, 10], ['step-up', 3, 10]] }, { name: 'Glutes and core', moves: [['glute-bridge', 3, 12], ['calf-raise', 3, 15], ['plank', 3, 30, 's']] }] },
       { title: 'Upper body basics', focus: 'Upper body', photo: 'card', blocks: [{ name: 'Push and pull', moves: [['push-up', 3, 8], ['row', 3, 10], ['shoulder-press', 3, 10]] }, { name: 'Arms and core', moves: [['biceps-curl', 3, 12], ['overhead-ext', 3, 12], ['dead-bug', 3, 10]] }] },
@@ -121,7 +124,7 @@ export const programmes: Programme[] = [
     [0, null, 1, null, 2, null, null]
   ),
   programme(
-    { id: 'glutes', name: 'Glutes and legs', tagline: 'Lower body focus', description: 'Four lower-body sessions a week built around hip thrusts, squats and lunges.', styles: ['Glutes and legs', 'Dumbbells'], length: 45, photo: 'kettle' },
+    { id: 'glutes', name: 'Glutes and legs', tagline: 'Lower body focus', description: 'Four lower-body sessions a week, built around hip thrusts, squats and lunges.', styles: ['Glutes and legs', 'Dumbbells'], photo: 'kettle' },
     [
       { title: 'Glute builder', focus: 'Glutes', photo: 'kettle', blocks: [{ name: 'Heavy', moves: [['hip-thrust', 3, 12], ['rdl', 3, 10], ['bulgarian-split-squat', 3, 10]] }, { name: 'Activation', moves: [['frog-pump', 3, 20], ['fire-hydrant', 3, 15], ['donkey-kick', 3, 15]] }] },
       { title: 'Quads and calves', focus: 'Legs', photo: 'press', blocks: [{ name: 'Squat and lunge', moves: [['goblet-squat', 3, 12], ['walking-lunge', 3, 12], ['step-up', 3, 10]] }, { name: 'Finish', moves: [['wall-sit', 3, 40, 's'], ['calf-raise', 3, 15], ['lateral-lunge', 3, 10]] }] },
@@ -131,11 +134,11 @@ export const programmes: Programme[] = [
     [0, 1, null, 2, null, 3, null]
   ),
   programme(
-    { id: 'pilates', name: 'Pilates core', tagline: 'No equipment', description: 'Short mat sessions for a strong core, hips and posture. No equipment needed.', styles: ['Core', 'Pilates strength', 'Bodyweight only'], length: 20, photo: 'catcow' },
+    { id: 'pilates', name: 'Pilates core', tagline: 'No equipment', description: 'Short mat sessions for a strong core, hips and posture. No equipment needed.', styles: ['Core', 'Pilates strength', 'Bodyweight only'], photo: 'catcow' },
     [
-      { title: 'Core foundations', focus: 'Core', photo: 'catcow', blocks: [{ name: 'Control', moves: [['pilates-hundred', 2, 40, 's'], ['dead-bug', 3, 10], ['bird-dog', 3, 10]] }, { name: 'Hold', moves: [['plank', 3, 30, 's'], ['glute-bridge', 3, 15], ['side-plank', 2, 30, 's']] }] },
-      { title: 'Abs and obliques', focus: 'Core', photo: 'explain', blocks: [{ name: 'Rotation', moves: [['bicycle-crunches', 3, 20], ['russian-twist', 3, 20], ['leg-raises', 3, 12]] }, { name: 'Finish', moves: [['v-ups', 3, 10], ['mountain-climber', 3, 30, 's'], ['side-plank', 2, 30, 's']] }] },
-      { title: 'Hips and posture', focus: 'Hips', photo: 'intro', blocks: [{ name: 'Hips', moves: [['glute-bridge', 3, 15], ['fire-hydrant', 3, 15], ['donkey-kick', 3, 15]] }, { name: 'Posture', moves: [['cat-cow', 2, 30, 's'], ['bird-dog', 3, 10], ['plank', 3, 30, 's']] }] },
+      { title: 'Core foundations', focus: 'Core', photo: 'catcow', blocks: [{ name: 'Control', moves: [['pilates-hundred', 2, 40, 's'], ['dead-bug', 2, 10], ['bird-dog', 2, 10]] }, { name: 'Hold', moves: [['plank', 2, 30, 's'], ['glute-bridge', 2, 15], ['side-plank', 2, 30, 's']] }] },
+      { title: 'Abs and obliques', focus: 'Core', photo: 'explain', blocks: [{ name: 'Rotation', moves: [['bicycle-crunches', 2, 20], ['russian-twist', 2, 20], ['leg-raises', 2, 12]] }, { name: 'Finish', moves: [['v-ups', 2, 10], ['mountain-climber', 2, 30, 's'], ['side-plank', 2, 30, 's']] }] },
+      { title: 'Hips and posture', focus: 'Hips', photo: 'intro', blocks: [{ name: 'Hips', moves: [['glute-bridge', 2, 15], ['fire-hydrant', 2, 15], ['donkey-kick', 2, 15]] }, { name: 'Posture', moves: [['cat-cow', 2, 30, 's'], ['bird-dog', 2, 10], ['plank', 2, 30, 's']] }] },
     ],
     [0, 1, null, 2, 0, null, null]
   ),

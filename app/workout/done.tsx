@@ -38,8 +38,8 @@ export default function Done() {
         </View>
         <View style={{ alignSelf: 'stretch', flexDirection: 'row', gap: 12, borderTopWidth: 1, borderTopColor: color.line, paddingTop: 18 }}>
           <Stat value={formatClock(last?.seconds ?? 0)} label="Total time" />
-          <Stat value={String(last?.moves ?? 0)} label="Moves" />
-          <Stat value={String(last?.sets ?? 0)} label="Sets" />
+          <Stat value={String(last?.moves ?? 0)} label="Moves done" />
+          <Stat value={String(last?.sets ?? 0)} label="Sets done" />
         </View>
       </View>
       <View style={{ paddingHorizontal: 24, paddingBottom: 12 }}>

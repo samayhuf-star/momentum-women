@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { dayKey } from '../lib/week';
 
@@ -49,12 +49,17 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     })();
   }, []);
 
+  // A set can be logged and the workout completed in the same handler, so read the latest state from a ref.
+  const latest = useRef(state);
+  latest.current = state;
   const commit = async (next: Stored) => {
+    latest.current = next;
     setState(next);
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   };
 
   const completeWorkout: ProgressContextType['completeWorkout'] = async (plannedSeconds = 0, detail) => {
+    const state = latest.current;
     const today = dayKey();
     const added = plannedSeconds > 0 ? Math.max(1, Math.round(plannedSeconds / 60)) : 0;
     const firstToday = !state.completedDays.includes(today);
@@ -72,11 +77,13 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logSet: ProgressContextType['logSet'] = async (exerciseId, reps, weight) => {
+    const state = latest.current;
     const list = [...(state.journal[exerciseId] ?? []), { day: dayKey(), reps, weight }].slice(-50);
     await commit({ ...state, journal: { ...state.journal, [exerciseId]: list } });
   };
 
   const resetProgress = async () => {
+    latest.current = EMPTY;
     setState(EMPTY);
     await AsyncStorage.removeItem(STORAGE_KEY);
   };
