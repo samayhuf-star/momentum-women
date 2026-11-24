@@ -12,17 +12,20 @@
     "expo-asset": "~58.0.21",
     "expo-constants": "~58.0.16",
     "expo-font": "~58.0.12",
-    "expo-iap": "^6.4.4",
     "expo-image": "~58.0.18",
     "expo-linear-gradient": "~58.0.4",
     "expo-linking": "~58.0.17",
     "expo-router": "~58.0.31",
     "expo-splash-screen": "~58.0.14",
     "expo-status-bar": "~58.0.5",
+    "onesignal-expo-plugin": "^2.8.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-native": "0.88.1",
     "react-native-gesture-handler": "~3.3.0",
+    "react-native-onesignal": "^5.6.0",
+    "react-native-purchases": "^11.0.4",
+    "react-native-purchases-ui": "^11.0.4",
     "react-native-safe-area-context": "~5.11.1",
     "react-native-screens": "~4.30.1"
   },
@@ -37,7 +40,7 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test lib/progressDate.test.ts lib/sessionMeta.test.ts lib/manageSubscriptions.test.ts lib/week.test.ts lib/progress.test.ts lib/programmes.test.ts"
+    "test": "node --experimental-strip-types --test lib/progressDate.test.ts lib/sessionMeta.test.ts lib/week.test.ts lib/progress.test.ts lib/programmes.test.ts"
   },
   "private": true
 }

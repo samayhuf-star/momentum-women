@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
@@ -10,9 +11,13 @@ import { AuthProvider } from '../context/AuthContext';
 import { ProgressProvider } from '../context/ProgressContext';
 import { ProProvider } from '../context/ProContext';
 import { PlanProvider } from '../context/PlanContext';
+import { initPush } from '../lib/push';
 import { color } from '../lib/theme';
 
 export default function RootLayout() {
+  useEffect(() => {
+    initPush();
+  }, []);
   const [loaded, error] = useFonts({ Archivo_800ExtraBold, Inter_400Regular, Inter_500Medium, Inter_600SemiBold });
   if (!loaded && !error) return <View style={{ flex: 1, backgroundColor: color.bg }} />;
 

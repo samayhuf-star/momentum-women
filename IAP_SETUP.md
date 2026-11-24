@@ -1,13 +1,13 @@
 # In-App Purchase Setup
 
-Purchases use Apple StoreKit 2 through `expo-iap`. Do not add RevenueCat or `react-native-purchases`.
+Purchases go through RevenueCat (`react-native-purchases` and `react-native-purchases-ui`). No direct StoreKit code.
 
-## Product IDs (App Store Connect)
-- `com.samayvashsht.momentumwomen.monthly` — $2.99/month, 7-day free trial for eligible new subscribers
-- `com.samayvashsht.momentumwomen.yearly` — $19.99/year, 7-day free trial for eligible new subscribers
-- `com.samayvashsht.momentumwomen.lifetime` — $39.99 one-time non-consumable, no trial
+## Plans
+See `PRICING.md`. Entitlement `premium`, offering `default`, packages `weekly`, `monthly`, `annual`, `lifetime`.
 
 ## In the app
-- `lib/purchases.ts` loads store prices, checks intro-offer eligibility, and restores purchases.
-- The paywall shows "7 days free, then <store price>/period, cancel anytime" only when the store reports an eligible trial. Lifetime never shows trial text.
-- Simulator testing uses `qa/MomentumWomen.storekit` (wired by `qa/sim-qa/prepare.sh`).
+- `lib/purchases.ts` configures RevenueCat from `EXPO_PUBLIC_RC_IOS_KEY`, listens for customer-info changes, restores and opens Customer Center.
+- `app/paywall.tsx` shows RevenueCat's own paywall, designed in the RevenueCat dashboard.
+- Starting a workout needs the `premium` entitlement. Expo Go and key-less dev runs stay open so screens can be checked.
+- Push: OneSignal, App ID in `EXPO_PUBLIC_ONESIGNAL_APP_ID`.
+- Purchases cannot be tested in Expo Go. Use a development or TestFlight build with a sandbox Apple ID.

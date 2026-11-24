@@ -8,7 +8,17 @@ import { usePlan } from '../../context/PlanContext';
 import { useProgress } from '../../context/ProgressContext';
 import { usePro } from '../../context/ProContext';
 import { programmeById } from '../../data/programmes';
+import { askForPush } from '../../lib/push';
 import { color, font } from '../../lib/theme';
+
+type Store = typeof import('../../lib/purchases');
+const store = (): Store | null => {
+  try {
+    return require('../../lib/purchases') as Store;
+  } catch {
+    return null;
+  }
+};
 
 const SUPPORT_URL = 'https://samayhuf-star.github.io/app-legal/momentum-women/support.html';
 
@@ -29,7 +39,7 @@ export default function Profile() {
   const { user, logout } = useAuth();
   const plan = usePlan();
   const progress = useProgress();
-  const { isPro } = usePro();
+  const { isPro, refresh } = usePro();
   const programme = programmeById(plan.programmeId);
 
   const erase = () =>
@@ -56,7 +66,7 @@ export default function Profile() {
           </View>
           <View style={{ gap: 4 }}>
             <Heading size={20}>{user?.name ?? 'Guest'}</Heading>
-            <Text style={{ fontFamily: font.body, fontSize: 13, color: color.muted }}>{isPro ? 'Momentum Pro' : 'Free preview'}</Text>
+            <Text style={{ fontFamily: font.body, fontSize: 13, color: color.muted }}>{isPro ? 'Momentum Premium' : 'Not subscribed'}</Text>
           </View>
         </View>
         {!isPro ? (
@@ -70,7 +80,9 @@ export default function Profile() {
         ) : null}
         <View style={{ gap: 8 }}>
           <Row label="My programme" value={programme?.name} testID="profile-programme" onPress={() => router.push('/onboarding/programmes')} />
-          <Row label="Workout reminders" value={plan.reminders ? 'On' : 'Off'} testID="profile-reminders" onPress={() => plan.setReminders(!plan.reminders)} />
+          <Row label="Workout reminders" value={plan.reminders ? 'On' : 'Off'} testID="profile-reminders" onPress={async () => { const on = !plan.reminders; await plan.setReminders(on); if (on) await askForPush(); }} />
+          {isPro ? <Row label="Manage subscription" testID="profile-manage" onPress={() => store()?.openCustomerCenter()} /> : null}
+          <Row label="Restore purchases" testID="profile-restore" onPress={async () => { const ok = await store()?.restore(); await refresh(); Alert.alert(ok ? 'Restored' : 'Nothing to restore', ok ? 'Your subscription is active again.' : 'We could not find an active purchase for this Apple ID.'); }} />
           <Row label="Exercise library" testID="profile-library" onPress={() => router.push('/library')} />
           <Row label="Help and support" testID="profile-support" onPress={() => Linking.openURL(SUPPORT_URL)} />
           <Row label="About and credits" testID="profile-credits" onPress={() => router.push('/credits')} />

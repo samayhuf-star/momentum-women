@@ -12,7 +12,13 @@
       "bundleIdentifier": "com.samayvashsht.momentumwomen",
       "buildNumber": "4",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
+      },
+      "entitlements": {
+        "aps-environment": "production"
       }
     },
     "android": {
@@ -22,8 +28,14 @@
       }
     },
     "plugins": [
+      [
+        "onesignal-expo-plugin",
+        {
+          "mode": "production",
+          "disableLocation": true
+        }
+      ],
       "expo-router",
-      "expo-iap",
       "expo-apple-authentication",
       "expo-font",
       [

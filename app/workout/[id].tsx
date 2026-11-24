@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable } from 'react-native';
 import { Body, Heading, IconButton, Photo, PrimaryButton } from '../../components/ui';
+import { usePro } from '../../context/ProContext';
 import { findSession } from '../../data/programmes';
 import { photos } from '../../lib/photos';
 import { color, font } from '../../lib/theme';
@@ -20,6 +21,7 @@ function Action({ icon, label, onPress, testID }: { icon: keyof typeof Ionicons.
 export default function WorkoutIntro() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { canTrain, loading } = usePro();
   const session = findSession(String(id));
   if (!session) {
     return (
@@ -44,7 +46,7 @@ export default function WorkoutIntro() {
           <Action icon="share-outline" label="Share" testID="workout-share" onPress={() => Share.share({ message: `I'm doing ${session.title} in Momentum Women.` })} />
         </View>
         <View style={{ flex: 1 }} />
-        <PrimaryButton label="Start workout" testID="workout-start" onPress={() => router.push({ pathname: '/workout/player', params: { id: session.key } })} />
+        <PrimaryButton label="Start workout" testID="workout-start" onPress={() => (canTrain || loading ? router.push({ pathname: '/workout/player', params: { id: session.key } }) : router.push('/paywall'))} />
         <View style={{ height: 8 }} />
       </SafeAreaView>
     </View>

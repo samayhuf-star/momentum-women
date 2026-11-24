@@ -1,3 +1,4 @@
+import { askForPush } from '../lib/push';
 import { Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -10,6 +11,7 @@ export default function Started() {
   const plan = usePlan();
   const finish = async (reminders: boolean) => {
     await plan.setReminders(reminders);
+    if (reminders) await askForPush();
     await plan.finishOnboarding();
     router.replace('/(tabs)');
   };

@@ -1,299 +1,101 @@
-import { Linking, Platform } from 'react-native';
-import {
-  currentEntitlementIOS,
-  deepLinkToSubscriptions,
-  ErrorCode,
-  fetchProducts,
-  finishTransaction,
-  getActiveSubscriptions,
-  getAvailablePurchases,
-  hasActiveSubscriptions,
-  initConnection,
-  isEligibleForIntroOfferIOS,
-  isTransactionVerifiedIOS,
-  isUserCancelledError,
-  purchaseErrorListener,
-  purchaseUpdatedListener,
-  requestPurchase,
-  restorePurchases as storeRestore,
-  syncIOS,
-  type ProductOrSubscription,
-  type Purchase,
-} from 'expo-iap';
-import { showManageSubscriptionsIOS } from 'expo-iap/build/modules/ios';
-import { ALL_PRODUCT_IDS, IAP_PRODUCT_IDS, SUB_PRODUCT_IDS, isKnownProduct, PRODUCT_CATALOG } from './pro';
-import { freeTrialDays, type ProductLike } from './introOffer';
-import { openManageSubscriptions } from './manageSubscriptions';
+import { Platform } from 'react-native';
+import Purchases, { LOG_LEVEL, type CustomerInfo } from 'react-native-purchases';
+import RevenueCatUI from 'react-native-purchases-ui';
+import { ENTITLEMENT } from './pro';
 
-export type Plan = (typeof PRODUCT_CATALOG)[number] & {
-  price: string;
-  product: ProductOrSubscription;
-  trialDays: number | null;
-};
+/** All store work goes through RevenueCat. Keys are public SDK keys baked in at build time. */
+const API_KEY = Platform.select({
+  ios: process.env.EXPO_PUBLIC_RC_IOS_KEY,
+  android: process.env.EXPO_PUBLIC_RC_ANDROID_KEY,
+}) ?? '';
 
-async function introEligible(product: ProductOrSubscription): Promise<boolean> {
-  if (Platform.OS !== 'ios') return true;
-  const group = (product as { subscriptionGroupIdIOS?: string | null }).subscriptionGroupIdIOS;
-  if (!group) return false;
-  try {
-    return !!(await isEligibleForIntroOfferIOS(group));
-  } catch (e) {
-    logErr('isEligibleForIntroOfferIOS', e);
-    return false;
+let configured = false;
+let listening = false;
+const listeners = new Set<(isPremium: boolean) => void>();
+
+export const isPremiumFrom = (info: CustomerInfo | null | undefined) => !!info?.entitlements.active[ENTITLEMENT];
+
+const log = (action: string, e: unknown) => console.log('[momentum-rc]', `${action} failed`, (e as { message?: string })?.message ?? e);
+
+/** Configure RevenueCat once. Returns false when no key is baked into this build. */
+export async function initPurchases(appUserId?: string | null): Promise<boolean> {
+  if (!API_KEY) return false;
+  if (!configured) {
+    if (__DEV__) Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+    Purchases.configure({ apiKey: API_KEY, appUserID: appUserId || undefined });
+    configured = true;
+    if (Platform.OS === 'ios') Purchases.enableAdServicesAttributionTokenCollection().catch((e) => log('adServices', e));
   }
-}
-
-export type BuyResult = 'purchased' | 'cancelled' | 'pending' | 'error';
-export type PlansLoad = { plans: Plan[]; error: string | null };
-
-let connected = false;
-let listeners = false;
-const entitlementListeners = new Set<(isPremium: boolean) => void>();
-let purchaseWaiter: ((result: BuyResult) => void) | null = null;
-
-const emitPremium = (isPremium: boolean) => {
-  entitlementListeners.forEach((cb) => cb(isPremium));
-};
-
-const logErr = (action: string, e: unknown) => {
-  const err = e as { code?: unknown; message?: string; debugMessage?: string };
-  console.log('[momentum-iap]', `${action} failed`, {
-    code: err?.code,
-    message: err?.message,
-    debugMessage: err?.debugMessage,
-  });
-};
-
-async function ensureConnected(): Promise<boolean> {
-  if (connected) return true;
-  try {
-    connected = !!(await initConnection());
-  } catch (e) {
-    logErr('initConnection', e);
-    connected = false;
-  }
-  return connected;
-}
-
-async function verifyOnDevice(purchase: Purchase): Promise<boolean> {
-  if (purchase.purchaseState === 'pending') return false;
-  if ('isSuspendedAndroid' in purchase && purchase.isSuspendedAndroid) return false;
-  if (!isKnownProduct(purchase.productId)) return false;
-
-  if (Platform.OS === 'ios') {
-    try {
-      if (await isTransactionVerifiedIOS(purchase.productId)) return true;
-    } catch (e) {
-      logErr('isTransactionVerifiedIOS', e);
-    }
-    try {
-      const entitlement = await currentEntitlementIOS(purchase.productId);
-      if (entitlement) return true;
-    } catch (e) {
-      logErr('currentEntitlementIOS', e);
-    }
-    return purchase.purchaseState === 'purchased' || purchase.purchaseState === 'unknown';
-  }
-
-  return purchase.purchaseState === 'purchased' || purchase.purchaseState === 'unknown';
-}
-
-async function verifyAndFinish(purchase: Purchase): Promise<boolean> {
-  if (purchase.purchaseState === 'pending') return false;
-  const ok = await verifyOnDevice(purchase);
-  if (!ok) return false;
-  try {
-    await finishTransaction({ purchase, isConsumable: false });
-  } catch (e) {
-    logErr('finishTransaction', e);
+  if (!listening) {
+    listening = true;
+    Purchases.addCustomerInfoUpdateListener((info) => {
+      const on = isPremiumFrom(info);
+      listeners.forEach((cb) => cb(on));
+    });
   }
   return true;
 }
 
-function attachListeners() {
-  if (listeners) return;
-  listeners = true;
-  purchaseUpdatedListener(async (purchase) => {
-    if (purchase.purchaseState === 'pending') {
-      purchaseWaiter?.('pending');
-      purchaseWaiter = null;
-      return;
-    }
-    const ok = await verifyAndFinish(purchase);
-    if (ok) {
-      const entitled = await refreshEntitlements();
-      emitPremium(entitled);
-    }
-    purchaseWaiter?.(ok ? 'purchased' : 'error');
-    purchaseWaiter = null;
-  });
-  purchaseErrorListener((error) => {
-    logErr('purchaseError', error);
-    if (isUserCancelledError(error) || error.code === ErrorCode.UserCancelled) {
-      purchaseWaiter?.('cancelled');
-    } else if (error.code === ErrorCode.Pending || error.code === ErrorCode.DeferredPayment) {
-      purchaseWaiter?.('pending');
-    } else {
-      purchaseWaiter?.('error');
-    }
-    purchaseWaiter = null;
-  });
-}
-
-export async function initIAP(): Promise<boolean> {
-  attachListeners();
-  return ensureConnected();
-}
-
-export async function loadPlans(): Promise<PlansLoad> {
-  if (!(await ensureConnected())) {
-    return { plans: [], error: 'Plans unavailable right now. Please try again shortly.' };
-  }
-  const byId = new Map<string, ProductOrSubscription>();
-  try {
-    const subs = (await fetchProducts({ skus: SUB_PRODUCT_IDS, type: 'subs' })) ?? [];
-    for (const product of subs) {
-      if (product?.id && product.displayPrice) byId.set(product.id, product);
-    }
-  } catch (e) {
-    logErr('fetchProducts subs', e);
-  }
-  try {
-    const items = (await fetchProducts({ skus: IAP_PRODUCT_IDS, type: 'in-app' })) ?? [];
-    for (const product of items) {
-      if (product?.id && product.displayPrice) byId.set(product.id, product);
-    }
-  } catch (e) {
-    logErr('fetchProducts in-app', e);
-  }
-  const plans: Plan[] = [];
-  for (const def of PRODUCT_CATALOG) {
-    const product = byId.get(def.id);
-    if (!product) continue;
-    if (def.kind === 'lifetime') {
-      plans.push({ ...def, price: product.displayPrice, product, trialDays: null });
-      continue;
-    }
-    const days = freeTrialDays(product as unknown as ProductLike);
-    const trialDays = days && (await introEligible(product)) ? days : null;
-    plans.push({ ...def, price: product.displayPrice, product, trialDays });
-  }
-  if (!plans.length) {
-    return { plans: [], error: 'Plans unavailable right now. Please try again shortly.' };
-  }
-  return { plans, error: null };
-}
-
 export async function refreshEntitlements(): Promise<boolean> {
-  if (!(await ensureConnected())) return false;
+  if (!configured) return false;
   try {
-    if (Platform.OS === 'ios') {
-      for (const id of ALL_PRODUCT_IDS) {
-        try {
-          if (await currentEntitlementIOS(id)) return true;
-        } catch (e) {
-          logErr(`currentEntitlementIOS ${id}`, e);
-        }
-      }
-    }
-    try {
-      if (await hasActiveSubscriptions(SUB_PRODUCT_IDS)) return true;
-    } catch (e) {
-      logErr('hasActiveSubscriptions', e);
-    }
-    try {
-      const active = await getActiveSubscriptions(SUB_PRODUCT_IDS);
-      if (active.some((s) => s.isActive)) return true;
-    } catch (e) {
-      logErr('getActiveSubscriptions', e);
-    }
-    try {
-      const purchases = await getAvailablePurchases({ onlyIncludeActiveItemsIOS: true });
-      for (const purchase of purchases) {
-        if (isKnownProduct(purchase.productId) && (await verifyOnDevice(purchase))) return true;
-      }
-    } catch (e) {
-      logErr('getAvailablePurchases entitlements', e);
-    }
-    return false;
+    return isPremiumFrom(await Purchases.getCustomerInfo());
   } catch (e) {
-    logErr('refreshEntitlements', e);
+    log('getCustomerInfo', e);
     return false;
   }
 }
 
 export function onEntitlementChange(cb: (isPremium: boolean) => void): () => void {
-  entitlementListeners.add(cb);
+  listeners.add(cb);
   return () => {
-    entitlementListeners.delete(cb);
+    listeners.delete(cb);
   };
 }
 
-export async function buy(plan: Plan): Promise<BuyResult> {
-  if (!(await ensureConnected())) return 'error';
-  const result = new Promise<BuyResult>((resolve) => {
-    purchaseWaiter = resolve;
-  });
-  try {
-    await requestPurchase({
-      request: {
-        apple: { sku: plan.id },
-        google: { skus: [plan.id] },
-      },
-      type: plan.type,
-    });
-  } catch (e) {
-    purchaseWaiter = null;
-    if (isUserCancelledError(e) || (e as { code?: string })?.code === ErrorCode.UserCancelled) return 'cancelled';
-    if ((e as { code?: string })?.code === ErrorCode.Pending || (e as { code?: string })?.code === ErrorCode.DeferredPayment) {
-      return 'pending';
-    }
-    logErr('requestPurchase', e);
-    return 'error';
-  }
-  return result;
-}
-
-export async function manageSubscription(): Promise<void> {
-  await openManageSubscriptions({
-    platform: Platform.OS,
-    showManage: () => showManageSubscriptionsIOS(),
-    deepLink: () => deepLinkToSubscriptions(),
-    openURL: (url) => Linking.openURL(url),
-  });
-}
-
 export async function restore(): Promise<boolean> {
-  if (!(await ensureConnected())) return false;
-  if (Platform.OS === 'ios') {
-    try {
-      await syncIOS();
-    } catch (e) {
-      logErr('syncIOS restore', e);
-    }
-  }
+  if (!configured) return false;
   try {
-    await storeRestore();
+    const on = isPremiumFrom(await Purchases.restorePurchases());
+    listeners.forEach((cb) => cb(on));
+    return on;
   } catch (e) {
-    logErr('restorePurchases', e);
+    log('restorePurchases', e);
+    return false;
   }
-  try {
-    const purchases = await getAvailablePurchases({ onlyIncludeActiveItemsIOS: false });
-    for (const purchase of purchases) {
-      if (purchase.purchaseState === 'pending') continue;
-      if (!isKnownProduct(purchase.productId)) continue;
-      try {
-        if (await verifyOnDevice(purchase)) {
-          await finishTransaction({ purchase, isConsumable: false });
-        }
-      } catch (e) {
-        logErr('restore finish', e);
-      }
-    }
-  } catch (e) {
-    logErr('restore getAvailablePurchases', e);
-  }
-  const entitled = await refreshEntitlements();
-  emitPremium(entitled);
-  return entitled;
 }
+
+/** Link purchases to a signed-in user, or go back to anonymous on sign-out. */
+export async function identify(appUserId: string | null, name?: string | null) {
+  if (!configured) return;
+  try {
+    if (appUserId) {
+      await Purchases.logIn(appUserId);
+      if (name) await Purchases.setDisplayName(name);
+    } else if (!(await Purchases.isAnonymous())) {
+      await Purchases.logOut();
+    }
+  } catch (e) {
+    log('identify', e);
+  }
+}
+
+export async function setAttributes(attrs: Record<string, string | null>) {
+  if (!configured) return;
+  try {
+    await Purchases.setAttributes(attrs);
+  } catch (e) {
+    log('setAttributes', e);
+  }
+}
+
+export async function openCustomerCenter() {
+  if (!configured) return;
+  try {
+    await RevenueCatUI.presentCustomerCenter();
+  } catch (e) {
+    log('customerCenter', e);
+  }
+}
+
+export const hasKey = () => !!API_KEY;

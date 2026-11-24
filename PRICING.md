@@ -1,14 +1,13 @@
-# Pricing (locked)
+# Pricing (standard plans, set 22 Nov 2026)
 
-Free download.
+Paid only, no free tier. 7-day free trial on every subscription.
 
-| Plan | Price | Notes |
-|------|-------|-------|
-| Monthly | $2.99 | 7-day free trial for eligible new subscribers |
-| Yearly | $19.99 | 7-day free trial for eligible new subscribers |
-| Lifetime | $39.99 | One-time, no trial |
+| Plan | Price | RevenueCat package | Notes |
+|------|-------|--------------------|-------|
+| Weekly | $2.99 | `weekly` | 7-day free trial |
+| Monthly | $5.99 | `monthly` | 7-day free trial |
+| Annual | $29.99 | `annual` | 7-day free trial |
+| Lifetime | $39.99 | `lifetime` | One-time, non-consumable, no trial |
 
-Product IDs:
-- `com.samayvashsht.momentumwomen.monthly`
-- `com.samayvashsht.momentumwomen.yearly`
-- `com.samayvashsht.momentumwomen.lifetime`
+Entitlement: `premium`. Offering: `default`.
+Store product IDs: `com.samayvashsht.momentumwomen.{weekly,monthly,annual,lifetime}`.
