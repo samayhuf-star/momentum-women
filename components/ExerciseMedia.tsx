@@ -105,7 +105,7 @@ const wrapBase = {
 };
 
 const darkStyles = StyleSheet.create({
-  wrap: { ...wrapBase, backgroundColor: '#18181b' },
+  wrap: { ...wrapBase, backgroundColor: '#000000' },
   frame: { width: '100%', height: 200, alignItems: 'center', justifyContent: 'center' },
   image: { width: '100%', height: 200 },
   overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
