@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Animated, Image, StyleSheet, Text, View } from 'react-native';
 import { mediaFor } from '../lib/exerciseMediaMap';
 
@@ -26,14 +26,24 @@ export default function ExerciseMedia({ id, name, muscle, testID = 'exercise-det
   const start = media?.start || media?.hold || null;
   const end = media?.end || null;
   const fade = useRef(new Animated.Value(0)).current;
+  const frames = media?.frames && media.frames.length > 1 ? media.frames : null;
+  const [tick, setTick] = useState(0);
   const styles = dark ? darkStyles : lightStyles;
   const frameHeight = large ? 240 : 200;
   const key = (muscle || '').toLowerCase();
   const icon = ICONS[key] || { letter: (muscle || 'EX').slice(0, 2).toUpperCase(), bg: '#4A5568', fg: '#FFFFFF' };
 
+  // Flipbook: step through the poses forwards then backwards, like one smooth rep.
+  useEffect(() => {
+    if (!frames) return undefined;
+    setTick(0);
+    const timer = setInterval(() => setTick((t) => t + 1), 420);
+    return () => clearInterval(timer);
+  }, [id, frames]);
+
   useEffect(() => {
     fade.setValue(0);
-    if (!start || !end) {
+    if (frames || !start || !end) {
       return undefined;
     }
     const loop = Animated.loop(
@@ -46,11 +56,27 @@ export default function ExerciseMedia({ id, name, muscle, testID = 'exercise-det
     );
     loop.start();
     return () => loop.stop();
-  }, [id, start, end, fade]);
+  }, [id, start, end, fade, frames]);
+
+  const n = frames ? frames.length : 0;
+  const cycle = Math.max(1, 2 * n - 2);
+  const pos = tick % cycle;
+  const frameIndex = frames ? (pos < n ? pos : cycle - pos) : 0;
 
   return (
     <View style={styles.wrap} testID={testID} accessible accessibilityRole="image" accessibilityLabel={`${name}${muscle ? `, ${muscle}` : ''}`}>
-      {start ? (
+      {frames ? (
+        <View style={[styles.frame, { height: frameHeight }]} testID={`${testID}-flipbook`}>
+          {frames.map((src, i) => (
+            <Image
+              key={i}
+              source={src}
+              style={[styles.image, i === 0 ? null : styles.overlay, { height: frameHeight, opacity: i === frameIndex ? 1 : 0 }]}
+              resizeMode="contain"
+            />
+          ))}
+        </View>
+      ) : start ? (
         <View style={[styles.frame, { height: frameHeight }]}>
           <Image source={start} style={[styles.image, { height: frameHeight }]} resizeMode="contain" />
           {end ? (
