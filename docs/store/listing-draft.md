@@ -1,4 +1,4 @@
-# Listing draft — Momentum – Women's Workout
+# Listing draft — Womentum - Women workout Coach
 
 Draft for App Store Connect. Do not paste from this file by hand if App Publisher Bot is loading `docs/store/asc-fields.json`. No App Store Connect writes were made.
 
@@ -8,7 +8,7 @@ Checked 14 Nov 2026. Character counts are JavaScript string lengths. The en dash
 
 | Field | Value | Length |
 | --- | --- | --- |
-| Name | Momentum – Women's Workout | 26 (limit 30) |
+| Name | Womentum - Women workout Coach | 30 (limit 30) |
 | Bundle ID | `com.samayvashsht.momentumwomen` | |
 | ASC app | `6834676214` in `eas.json`. This draft does not change it. | |
 | Subtitle | Home and gym workout plans | 26 (limit 30) |

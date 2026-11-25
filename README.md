@@ -1,4 +1,4 @@
-# Momentum – Women's Workout
+# Womentum - Women workout Coach
 
 Guided workouts for iPhone, with a Today view, a timer or a rep counter, and on-screen form cues.
 
