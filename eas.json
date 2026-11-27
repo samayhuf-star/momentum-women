@@ -15,6 +15,10 @@
       "ios": {
         "image": "auto",
         "distribution": "store"
+      },
+      "env": {
+        "EXPO_PUBLIC_RC_IOS_KEY": "",
+        "EXPO_PUBLIC_ONESIGNAL_APP_ID": ""
       }
     }
   },

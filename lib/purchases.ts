@@ -1,182 +1,114 @@
 import { Linking, Platform } from 'react-native';
-import {
-  currentEntitlementIOS,
-  deepLinkToSubscriptions,
-  ErrorCode,
-  fetchProducts,
-  finishTransaction,
-  getActiveSubscriptions,
-  getAvailablePurchases,
-  hasActiveSubscriptions,
-  initConnection,
-  isEligibleForIntroOfferIOS,
-  isTransactionVerifiedIOS,
-  isUserCancelledError,
-  purchaseErrorListener,
-  purchaseUpdatedListener,
-  requestPurchase,
-  restorePurchases as storeRestore,
-  syncIOS,
-  type ProductOrSubscription,
-  type Purchase,
-} from 'expo-iap';
-import { showManageSubscriptionsIOS } from 'expo-iap/build/modules/ios';
-import { ALL_PRODUCT_IDS, IAP_PRODUCT_IDS, SUB_PRODUCT_IDS, isKnownProduct, PRODUCT_CATALOG } from './pro';
-import { freeTrialDays, type ProductLike } from './introOffer';
-import { openManageSubscriptions } from './manageSubscriptions';
+import Purchases, {
+  PURCHASES_ERROR_CODE,
+  type CustomerInfo,
+  type PurchasesPackage,
+  type PurchasesStoreProduct,
+} from 'react-native-purchases';
+import { PRODUCT_CATALOG } from './pro';
+
+// RevenueCat-backed store layer. Public API is unchanged from the previous expo-iap
+// version (initIAP / loadPlans / refreshEntitlements / onEntitlementChange / buy /
+// manageSubscription / restore) so ProContext and the custom paywall are untouched.
+//
+// Premium = ANY active RevenueCat entitlement (so the entitlement id can be anything);
+// plans are matched to PRODUCT_CATALOG by store product id (offering/package names are free).
+// Requires env at build time: EXPO_PUBLIC_RC_IOS_KEY (iOS) / EXPO_PUBLIC_RC_ANDROID_KEY (Android).
 
 export type Plan = (typeof PRODUCT_CATALOG)[number] & {
   price: string;
-  product: ProductOrSubscription;
+  product: PurchasesStoreProduct;
+  pkg: PurchasesPackage;
   trialDays: number | null;
 };
+export type BuyResult = 'purchased' | 'cancelled' | 'pending' | 'error';
+export type PlansLoad = { plans: Plan[]; error: string | null };
 
-async function introEligible(product: ProductOrSubscription): Promise<boolean> {
-  if (Platform.OS !== 'ios') return true;
-  const group = (product as { subscriptionGroupIdIOS?: string | null }).subscriptionGroupIdIOS;
-  if (!group) return false;
+const UNIT_DAYS: Record<string, number> = { DAY: 1, WEEK: 7, MONTH: 30, YEAR: 365 };
+let configured = false;
+const entitlementListeners = new Set<(isPremium: boolean) => void>();
+
+const emitPremium = (isPremium: boolean) => entitlementListeners.forEach((cb) => cb(isPremium));
+const isPremium = (info: CustomerInfo | null | undefined) =>
+  !!info && Object.keys(info.entitlements.active).length > 0;
+
+const logErr = (action: string, e: unknown) => {
+  const err = e as { code?: unknown; message?: string; underlyingErrorMessage?: string };
+  console.log('[momentum-iap]', `${action} failed`, {
+    code: err?.code,
+    message: err?.message,
+    underlyingErrorMessage: err?.underlyingErrorMessage,
+  });
+};
+
+function apiKey(): string | undefined {
+  return Platform.OS === 'ios'
+    ? process.env.EXPO_PUBLIC_RC_IOS_KEY
+    : process.env.EXPO_PUBLIC_RC_ANDROID_KEY;
+}
+
+export async function initIAP(): Promise<boolean> {
+  if (configured) return true;
+  const key = apiKey();
+  if (!key) {
+    logErr('configure', { message: 'missing RevenueCat API key (EXPO_PUBLIC_RC_IOS_KEY)' });
+    return false;
+  }
   try {
-    return !!(await isEligibleForIntroOfferIOS(group));
+    Purchases.configure({ apiKey: key });
+    Purchases.addCustomerInfoUpdateListener((info) => emitPremium(isPremium(info)));
+    configured = true;
+    return true;
   } catch (e) {
-    logErr('isEligibleForIntroOfferIOS', e);
+    logErr('configure', e);
     return false;
   }
 }
 
-export type BuyResult = 'purchased' | 'cancelled' | 'pending' | 'error';
-export type PlansLoad = { plans: Plan[]; error: string | null };
+function introDays(product: PurchasesStoreProduct): number | null {
+  const ip = product.introPrice;
+  if (!ip || ip.price !== 0) return null; // only a *free* trial counts
+  const per = UNIT_DAYS[ip.periodUnit] ?? 0;
+  const days = per * (ip.periodNumberOfUnits || 1) * (ip.cycles || 1);
+  return days > 0 ? days : null;
+}
 
-let connected = false;
-let listeners = false;
-const entitlementListeners = new Set<(isPremium: boolean) => void>();
-let purchaseWaiter: ((result: BuyResult) => void) | null = null;
-
-const emitPremium = (isPremium: boolean) => {
-  entitlementListeners.forEach((cb) => cb(isPremium));
-};
-
-const logErr = (action: string, e: unknown) => {
-  const err = e as { code?: unknown; message?: string; debugMessage?: string };
-  console.log('[momentum-iap]', `${action} failed`, {
-    code: err?.code,
-    message: err?.message,
-    debugMessage: err?.debugMessage,
-  });
-};
-
-async function ensureConnected(): Promise<boolean> {
-  if (connected) return true;
+async function trialEligible(productId: string): Promise<boolean> {
+  if (Platform.OS !== 'ios') return true;
   try {
-    connected = !!(await initConnection());
+    const map = await Purchases.checkTrialOrIntroductoryPriceEligibility([productId]);
+    return map?.[productId]?.status !== 1; // 1 = INELIGIBLE; unknown/eligible both allowed
   } catch (e) {
-    logErr('initConnection', e);
-    connected = false;
+    logErr('checkTrialEligibility', e);
+    return true;
   }
-  return connected;
-}
-
-async function verifyOnDevice(purchase: Purchase): Promise<boolean> {
-  if (purchase.purchaseState === 'pending') return false;
-  if ('isSuspendedAndroid' in purchase && purchase.isSuspendedAndroid) return false;
-  if (!isKnownProduct(purchase.productId)) return false;
-
-  if (Platform.OS === 'ios') {
-    try {
-      if (await isTransactionVerifiedIOS(purchase.productId)) return true;
-    } catch (e) {
-      logErr('isTransactionVerifiedIOS', e);
-    }
-    try {
-      const entitlement = await currentEntitlementIOS(purchase.productId);
-      if (entitlement) return true;
-    } catch (e) {
-      logErr('currentEntitlementIOS', e);
-    }
-    return purchase.purchaseState === 'purchased' || purchase.purchaseState === 'unknown';
-  }
-
-  return purchase.purchaseState === 'purchased' || purchase.purchaseState === 'unknown';
-}
-
-async function verifyAndFinish(purchase: Purchase): Promise<boolean> {
-  if (purchase.purchaseState === 'pending') return false;
-  const ok = await verifyOnDevice(purchase);
-  if (!ok) return false;
-  try {
-    await finishTransaction({ purchase, isConsumable: false });
-  } catch (e) {
-    logErr('finishTransaction', e);
-  }
-  return true;
-}
-
-function attachListeners() {
-  if (listeners) return;
-  listeners = true;
-  purchaseUpdatedListener(async (purchase) => {
-    if (purchase.purchaseState === 'pending') {
-      purchaseWaiter?.('pending');
-      purchaseWaiter = null;
-      return;
-    }
-    const ok = await verifyAndFinish(purchase);
-    if (ok) {
-      const entitled = await refreshEntitlements();
-      emitPremium(entitled);
-    }
-    purchaseWaiter?.(ok ? 'purchased' : 'error');
-    purchaseWaiter = null;
-  });
-  purchaseErrorListener((error) => {
-    logErr('purchaseError', error);
-    if (isUserCancelledError(error) || error.code === ErrorCode.UserCancelled) {
-      purchaseWaiter?.('cancelled');
-    } else if (error.code === ErrorCode.Pending || error.code === ErrorCode.DeferredPayment) {
-      purchaseWaiter?.('pending');
-    } else {
-      purchaseWaiter?.('error');
-    }
-    purchaseWaiter = null;
-  });
-}
-
-export async function initIAP(): Promise<boolean> {
-  attachListeners();
-  return ensureConnected();
 }
 
 export async function loadPlans(): Promise<PlansLoad> {
-  if (!(await ensureConnected())) {
+  if (!(await initIAP())) {
     return { plans: [], error: 'Plans unavailable right now. Please try again shortly.' };
   }
-  const byId = new Map<string, ProductOrSubscription>();
+  let packages: PurchasesPackage[] = [];
   try {
-    const subs = (await fetchProducts({ skus: SUB_PRODUCT_IDS, type: 'subs' })) ?? [];
-    for (const product of subs) {
-      if (product?.id && product.displayPrice) byId.set(product.id, product);
-    }
+    const offerings = await Purchases.getOfferings();
+    packages = offerings.current?.availablePackages ?? [];
   } catch (e) {
-    logErr('fetchProducts subs', e);
+    logErr('getOfferings', e);
   }
-  try {
-    const items = (await fetchProducts({ skus: IAP_PRODUCT_IDS, type: 'in-app' })) ?? [];
-    for (const product of items) {
-      if (product?.id && product.displayPrice) byId.set(product.id, product);
-    }
-  } catch (e) {
-    logErr('fetchProducts in-app', e);
+  const byProductId = new Map<string, PurchasesPackage>();
+  for (const pkg of packages) {
+    if (pkg.product?.identifier) byProductId.set(pkg.product.identifier, pkg);
   }
   const plans: Plan[] = [];
   for (const def of PRODUCT_CATALOG) {
-    const product = byId.get(def.id);
-    if (!product) continue;
-    if (def.kind === 'lifetime') {
-      plans.push({ ...def, price: product.displayPrice, product, trialDays: null });
-      continue;
+    const pkg = byProductId.get(def.id);
+    if (!pkg) continue;
+    let trialDays: number | null = null;
+    if (def.kind !== 'lifetime') {
+      const days = introDays(pkg.product);
+      trialDays = days && (await trialEligible(def.id)) ? days : null;
     }
-    const days = freeTrialDays(product as unknown as ProductLike);
-    const trialDays = days && (await introEligible(product)) ? days : null;
-    plans.push({ ...def, price: product.displayPrice, product, trialDays });
+    plans.push({ ...def, price: pkg.product.priceString, product: pkg.product, pkg, trialDays });
   }
   if (!plans.length) {
     return { plans: [], error: 'Plans unavailable right now. Please try again shortly.' };
@@ -185,39 +117,11 @@ export async function loadPlans(): Promise<PlansLoad> {
 }
 
 export async function refreshEntitlements(): Promise<boolean> {
-  if (!(await ensureConnected())) return false;
+  if (!(await initIAP())) return false;
   try {
-    if (Platform.OS === 'ios') {
-      for (const id of ALL_PRODUCT_IDS) {
-        try {
-          if (await currentEntitlementIOS(id)) return true;
-        } catch (e) {
-          logErr(`currentEntitlementIOS ${id}`, e);
-        }
-      }
-    }
-    try {
-      if (await hasActiveSubscriptions(SUB_PRODUCT_IDS)) return true;
-    } catch (e) {
-      logErr('hasActiveSubscriptions', e);
-    }
-    try {
-      const active = await getActiveSubscriptions(SUB_PRODUCT_IDS);
-      if (active.some((s) => s.isActive)) return true;
-    } catch (e) {
-      logErr('getActiveSubscriptions', e);
-    }
-    try {
-      const purchases = await getAvailablePurchases({ onlyIncludeActiveItemsIOS: true });
-      for (const purchase of purchases) {
-        if (isKnownProduct(purchase.productId) && (await verifyOnDevice(purchase))) return true;
-      }
-    } catch (e) {
-      logErr('getAvailablePurchases entitlements', e);
-    }
-    return false;
+    return isPremium(await Purchases.getCustomerInfo());
   } catch (e) {
-    logErr('refreshEntitlements', e);
+    logErr('getCustomerInfo', e);
     return false;
   }
 }
@@ -230,70 +134,41 @@ export function onEntitlementChange(cb: (isPremium: boolean) => void): () => voi
 }
 
 export async function buy(plan: Plan): Promise<BuyResult> {
-  if (!(await ensureConnected())) return 'error';
-  const result = new Promise<BuyResult>((resolve) => {
-    purchaseWaiter = resolve;
-  });
+  if (!(await initIAP())) return 'error';
+  if (!plan?.pkg) return 'error';
   try {
-    await requestPurchase({
-      request: {
-        apple: { sku: plan.id },
-        google: { skus: [plan.id] },
-      },
-      type: plan.type,
-    });
+    const { customerInfo } = await Purchases.purchasePackage(plan.pkg);
+    const entitled = isPremium(customerInfo);
+    emitPremium(entitled);
+    return entitled ? 'purchased' : 'error';
   } catch (e) {
-    purchaseWaiter = null;
-    if (isUserCancelledError(e) || (e as { code?: string })?.code === ErrorCode.UserCancelled) return 'cancelled';
-    if ((e as { code?: string })?.code === ErrorCode.Pending || (e as { code?: string })?.code === ErrorCode.DeferredPayment) {
-      return 'pending';
-    }
-    logErr('requestPurchase', e);
+    if ((e as { userCancelled?: boolean })?.userCancelled) return 'cancelled';
+    if ((e as { code?: string })?.code === PURCHASES_ERROR_CODE.PAYMENT_PENDING_ERROR) return 'pending';
+    logErr('purchasePackage', e);
     return 'error';
   }
-  return result;
 }
 
 export async function manageSubscription(): Promise<void> {
-  await openManageSubscriptions({
-    platform: Platform.OS,
-    showManage: () => showManageSubscriptionsIOS(),
-    deepLink: () => deepLinkToSubscriptions(),
-    openURL: (url) => Linking.openURL(url),
-  });
+  const url =
+    Platform.OS === 'ios'
+      ? 'https://apps.apple.com/account/subscriptions'
+      : 'https://play.google.com/store/account/subscriptions';
+  try {
+    await Linking.openURL(url);
+  } catch (e) {
+    logErr('manageSubscription', e);
+  }
 }
 
 export async function restore(): Promise<boolean> {
-  if (!(await ensureConnected())) return false;
-  if (Platform.OS === 'ios') {
-    try {
-      await syncIOS();
-    } catch (e) {
-      logErr('syncIOS restore', e);
-    }
-  }
+  if (!(await initIAP())) return false;
   try {
-    await storeRestore();
+    const entitled = isPremium(await Purchases.restorePurchases());
+    emitPremium(entitled);
+    return entitled;
   } catch (e) {
     logErr('restorePurchases', e);
+    return false;
   }
-  try {
-    const purchases = await getAvailablePurchases({ onlyIncludeActiveItemsIOS: false });
-    for (const purchase of purchases) {
-      if (purchase.purchaseState === 'pending') continue;
-      if (!isKnownProduct(purchase.productId)) continue;
-      try {
-        if (await verifyOnDevice(purchase)) {
-          await finishTransaction({ purchase, isConsumable: false });
-        }
-      } catch (e) {
-        logErr('restore finish', e);
-      }
-    }
-  } catch (e) {
-    logErr('restore getAvailablePurchases', e);
-  }
-  const entitled = await refreshEntitlements();
-  emitPremium(entitled);
-  return entitled;
 }

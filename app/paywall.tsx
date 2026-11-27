@@ -9,7 +9,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { buy, loadPlans, manageSubscription, restore, type Plan } from '../lib/purchases';
 import { ctaText, planLine, renewalDisclosure } from '../lib/introOffer';
 import { APPLE_EULA_URL, FREE_FEATURES, PRIVACY_URL, PRO_FEATURES, TERMS_URL } from '../lib/pro';
@@ -17,6 +17,9 @@ import { usePro } from '../context/ProContext';
 
 export default function PaywallScreen() {
   const router = useRouter();
+  const { from } = useLocalSearchParams<{ from?: string }>();
+  // Opened as the last onboarding screen: leaving goes to the app, not back into onboarding.
+  const dismiss = () => (from === 'onboarding' ? router.replace('/(tabs)') : router.back());
   const { isPro, refresh } = usePro();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +46,7 @@ export default function PaywallScreen() {
     if (result === 'purchased') {
       await refresh();
       Alert.alert('Unlocked', 'Momentum Pro is now active on this Apple ID.', [
-        { text: 'OK', onPress: () => router.back() },
+        { text: 'OK', onPress: dismiss },
       ]);
     } else if (result === 'cancelled') {
       return;
@@ -62,7 +65,7 @@ export default function PaywallScreen() {
     if (ok) {
       await refresh();
       Alert.alert('Restored', 'Your Momentum Pro purchase is active.', [
-        { text: 'OK', onPress: () => router.back() },
+        { text: 'OK', onPress: dismiss },
       ]);
     } else {
       Alert.alert('No purchase found', 'No Momentum Pro purchase was found for this Apple ID.');
@@ -74,7 +77,7 @@ export default function PaywallScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} testID="paywall">
-      <Pressable accessibilityRole="button" style={styles.close} onPress={() => router.back()} testID="close-paywall">
+      <Pressable accessibilityRole="button" style={styles.close} onPress={dismiss} testID="close-paywall">
         <Text style={styles.closeText}>Close</Text>
       </Pressable>
 
