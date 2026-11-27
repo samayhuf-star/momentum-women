@@ -1,0 +1,282 @@
+# Simulator QA for Momentum Women build 1.0.0 (3), commit d9999542.
+# Push to qa/sim-gate-b3, or run it by hand. No EAS, no signing, no TestFlight.
+name: sim-qa-gate
+
+on:
+  push:
+    branches:
+      - qa/sim-gate-b3
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  women:
+    name: women ${{ matrix.device.slug }}
+    runs-on: macos-latest
+    timeout-minutes: 120
+    concurrency:
+      group: sim-qa-gate-${{ github.ref }}-${{ matrix.device.slug }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        device:
+          - name: iPhone SE (3rd generation)
+            slug: iphone-se-3rd
+            fallback: ""
+          - name: iPhone 16 Pro Max
+            slug: iphone-16-pro-max
+            fallback: iPhone 17 Pro Max
+    env:
+      CI: "1"
+      EXPO_NO_TELEMETRY: "1"
+      EXPO_NO_GIT_STATUS: "1"
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      BUNDLE_ID: com.samayvashsht.momentumwomen
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Tool versions
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          node -v
+          npm -v
+          pod --version || true
+          java -version || true
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Expo prebuild
+        run: |
+          set -euo pipefail
+          npx expo prebuild --platform ios --no-install --clean
+
+      - name: Embed a release JS bundle
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/jsbundle"
+          npx expo export:embed \
+            --platform ios \
+            --dev false \
+            --entry-file index.ts \
+            --bundle-output "$RUNNER_TEMP/jsbundle/main.jsbundle" \
+            --assets-dest "$RUNNER_TEMP/jsbundle/assets"
+          test -s "$RUNNER_TEMP/jsbundle/main.jsbundle"
+          ls -lh "$RUNNER_TEMP/jsbundle/main.jsbundle"
+
+      - name: Install pods
+        run: |
+          set -euo pipefail
+          cd ios
+          pod install
+
+      - name: Wire StoreKit config
+        run: |
+          set -euo pipefail
+          gem install xcodeproj --no-document
+          ruby qa/sim-gate/prepare_storekit.rb
+          grep -n "StoreKitConfigurationFileReference" -A2 ios/*.xcodeproj/xcshareddata/xcschemes/*.xcscheme
+
+      - name: Build simulator app
+        run: |
+          set -euo pipefail
+          WORKSPACE=$(ls -d ios/*.xcworkspace | head -n1)
+          SCHEME=$(xcodebuild -workspace "$WORKSPACE" -list -json | python3 -c '
+          import json,sys
+          raw=sys.stdin.read()
+          raw=raw[raw.find("{"):]
+          data=json.loads(raw)
+          schemes=(data.get("workspace") or data.get("project") or {}).get("schemes") or []
+          schemes=[s for s in schemes if not s.startswith("Pods")]
+          if not schemes:
+              raise SystemExit("no schemes")
+          print(schemes[0])
+          ')
+          echo "workspace=$WORKSPACE"
+          echo "scheme=$SCHEME"
+          echo "$WORKSPACE" > "$RUNNER_TEMP/workspace.txt"
+          echo "$SCHEME" > "$RUNNER_TEMP/scheme.txt"
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath "$RUNNER_TEMP/dd" \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            build
+          APP=$(find "$RUNNER_TEMP/dd/Build/Products" -type d -name "*.app" -path "*iphonesimulator*" ! -name "*Tests*" ! -name "*Bootstrap*" | head -n1)
+          echo "app=$APP"
+          echo "$APP" > "$RUNNER_TEMP/app.txt"
+          if [ ! -s "$APP/main.jsbundle" ]; then
+            echo "xcodebuild did not leave main.jsbundle at the app root; copying the export:embed bundle"
+            cp "$RUNNER_TEMP/jsbundle/main.jsbundle" "$APP/main.jsbundle"
+            if [ -d "$RUNNER_TEMP/jsbundle/assets" ]; then
+              cp -R "$RUNNER_TEMP/jsbundle/assets/." "$APP/"
+            fi
+          fi
+          ls -lh "$APP/main.jsbundle"
+          test -s "$APP/main.jsbundle"
+          rm -rf "$RUNNER_TEMP/MomentumWomen.app"
+          cp -R "$APP" "$RUNNER_TEMP/MomentumWomen.app"
+          echo "$RUNNER_TEMP/MomentumWomen.app" > "$RUNNER_TEMP/app.txt"
+
+      - name: Boot simulator
+        id: device
+        run: |
+          set -euo pipefail
+          python3 qa/sim-gate/ensure_device.py "${{ matrix.device.name }}" "${{ matrix.device.fallback }}" | tee "$RUNNER_TEMP/device.txt"
+          UDID=$(awk -F= '/^udid=/{print $2}' "$RUNNER_TEMP/device.txt")
+          NAME=$(awk -F= '/^name=/{print $2}' "$RUNNER_TEMP/device.txt")
+          SLUG=$(awk -F= '/^slug=/{print $2}' "$RUNNER_TEMP/device.txt")
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+
+      - name: Prime StoreKit test session
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/sim-qa"
+          export WORKSPACE="$(cat "$RUNNER_TEMP/workspace.txt")"
+          export SCHEME="$(cat "$RUNNER_TEMP/scheme.txt")"
+          export UDID="${{ steps.device.outputs.udid }}"
+          export DD="$RUNNER_TEMP/dd"
+          # TEST_RUNNER_ is stripped before the hosted app process sees SIM_QA_OUT.
+          export TEST_RUNNER_SIM_QA_OUT="$RUNNER_TEMP/sim-qa"
+          set +e
+          python3 - <<'PY'
+          import os, subprocess, sys
+          cmd = [
+              "xcodebuild", "test",
+              "-workspace", os.environ["WORKSPACE"],
+              "-scheme", os.environ["SCHEME"],
+              "-configuration", "Release",
+              "-destination", "platform=iOS Simulator,id=%s" % os.environ["UDID"],
+              "-derivedDataPath", os.environ["DD"],
+              "-only-testing:StoreKitBootstrap/StoreKitBootstrapTests/testEnableLocalStoreKit",
+              "CODE_SIGNING_ALLOWED=NO",
+          ]
+          print(" ".join(cmd), flush=True)
+          try:
+              result = subprocess.run(cmd, timeout=900)
+          except subprocess.TimeoutExpired:
+              print("storekit bootstrap timed out", flush=True)
+              sys.exit(1)
+          sys.exit(result.returncode)
+          PY
+          RC=$?
+          set -e
+          echo "---- storekit bootstrap note ----"
+          cat "$RUNNER_TEMP/sim-qa/storekit-bootstrap.txt" || echo "no storekit-bootstrap.txt"
+          exit "$RC"
+
+      - name: Install Maestro
+        run: |
+          set -euo pipefail
+          if ! command -v java >/dev/null 2>&1; then
+            brew install openjdk
+            echo "/opt/homebrew/opt/openjdk/bin" >> "$GITHUB_PATH"
+            export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+          fi
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+          export PATH="$PATH:$HOME/.maestro/bin"
+          maestro --version
+
+      - name: Fresh install and Maestro
+        id: maestro
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          export PATH="$PATH:$HOME/.maestro/bin"
+          UDID="${{ steps.device.outputs.udid }}"
+          APP=$(cat "$RUNNER_TEMP/app.txt")
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl uninstall "$UDID" "$BUNDLE_ID" || true
+          xcrun simctl install "$UDID" "$APP"
+          xcrun simctl get_app_container "$UDID" "$BUNDLE_ID"
+          mkdir -p "$RUNNER_TEMP/maestro" "$RUNNER_TEMP/maestro-debug"
+          set +e
+          maestro test qa/sim-gate/flow.yaml \
+            --device "$UDID" \
+            --test-output-dir "$RUNNER_TEMP/maestro" \
+            --debug-output "$RUNNER_TEMP/maestro-debug" \
+            --flatten-debug-output \
+            --format JUNIT \
+            --output "$RUNNER_TEMP/maestro-junit.xml"
+          RC=$?
+          set -e
+          echo "exit=$RC" | tee "$RUNNER_TEMP/maestro-exit.txt"
+          echo "exit=$RC" >> "$GITHUB_OUTPUT"
+          find "$RUNNER_TEMP/maestro" "$RUNNER_TEMP/maestro-debug" -name "*.png" | head -n 80 || true
+          exit 0
+
+      - name: Collect screenshots
+        if: always()
+        run: |
+          set -euo pipefail
+          SLUG="${{ steps.device.outputs.slug }}"
+          NAME="${{ steps.device.outputs.name }}"
+          python3 -m venv "$RUNNER_TEMP/py"
+          "$RUNNER_TEMP/py/bin/pip" install pillow
+          "$RUNNER_TEMP/py/bin/python" qa/sim-gate/collect.py \
+            --maestro-dir "$RUNNER_TEMP/maestro" \
+            --debug-dir "$RUNNER_TEMP/maestro-debug" \
+            --dest "women/$SLUG" \
+            --device-name "$NAME"
+          {
+            echo "device: $NAME"
+            echo "slug: $SLUG"
+            echo "bundle: $BUNDLE_ID"
+            echo "commit: $(git rev-parse HEAD)"
+            xcodebuild -version
+            echo "---- js bundle ----"
+            APP=$(cat "$RUNNER_TEMP/app.txt" 2>/dev/null || true)
+            if [ -n "${APP:-}" ]; then
+              find "$APP" -name "main.jsbundle" -exec ls -lh {} \; || true
+            fi
+            echo "---- storekit ----"
+            cat "$RUNNER_TEMP/sim-qa/storekit-bootstrap.txt" 2>/dev/null || echo "storekit bootstrap did not write a note"
+            echo "---- maestro ----"
+            cat "$RUNNER_TEMP/maestro-exit.txt" 2>/dev/null || true
+          } > "women/$SLUG/device.txt"
+          if [ -f "$RUNNER_TEMP/maestro-junit.xml" ]; then
+            cp "$RUNNER_TEMP/maestro-junit.xml" "women/$SLUG/maestro-junit.xml"
+          fi
+          if [ -f "$RUNNER_TEMP/sim-qa/storekit-bootstrap.txt" ]; then
+            cp "$RUNNER_TEMP/sim-qa/storekit-bootstrap.txt" "women/$SLUG/storekit-bootstrap.txt"
+          fi
+
+      - name: Upload women-${{ matrix.device.slug }}
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: women-${{ matrix.device.slug }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: women/
+
+      - name: Report Maestro result
+        if: always()
+        run: |
+          set -euo pipefail
+          RC=$(awk -F= '/^exit=/{print $2}' "$RUNNER_TEMP/maestro-exit.txt" 2>/dev/null || echo "missing")
+          echo "Maestro exit: $RC"
+          if [ "$RC" != "0" ]; then
+            exit 1
+          fi
