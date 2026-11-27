@@ -1,0 +1,34 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "categories": [
+      "HEALTH_AND_FITNESS",
+      "LIFESTYLE"
+    ],
+    "info": {
+      "en-US": {
+        "title": "Womentum: Gym & Home Workouts",
+        "subtitle": "Strength plans for women",
+        "description": "Momentum – Women's Workout is a training app for guided sessions on iPhone, at home or in the gym.\n\nToday opens on the next session, with the length and the exercise count, and a week view of workouts saved on this iPhone. Each move has a short form cue and a still. Train with a timer or a rep counter, and see the next move before you continue.\n\nThe beginner plan, the workout player, the library, and progress are free. Momentum Pro adds the Full Body and Upper Body plans.\n\nDownload is free. Momentum Pro is optional:\n- $2.99 per month, with a 7-day free trial\n- $19.99 per year, with a 7-day free trial\n- $39.99 for lifetime access, a one-time purchase with no trial\n\nPrices in the app are the App Store price for your storefront. Cancel a subscription at least 24 hours before the trial or the period ends if you do not want it to renew. Manage or cancel in your Apple ID settings.\n\nThe app is a general training tool. It does not offer medical, diet, or weight-loss advice.",
+        "keywords": [
+          "fitness",
+          "training",
+          "exercise",
+          "toning",
+          "glutes",
+          "timer",
+          "reps",
+          "beginner",
+          "bodyweight",
+          "program",
+          "dumbbell",
+          "legs",
+          "routine"
+        ],
+        "promoText": "Guided sessions for home or the gym, with a timer or a rep counter and form cues. The beginner plan is free. Pro adds the Full Body and Upper Body plans.",
+        "supportUrl": "https://samayhuf-star.github.io/app-legal/momentum-women/support.html",
+        "privacyPolicyUrl": "https://samayhuf-star.github.io/app-legal/momentum-women/privacy.html"
+      }
+    }
+  }
+}
