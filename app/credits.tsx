@@ -12,7 +12,7 @@ export default function CreditsScreen() {
         </Pressable>
         <Text style={styles.title}>About and Credits</Text>
         <Text style={styles.body}>
-          Womentum - Women workout Coach is published by Samay Vashsht, 2026.
+          Womentum: Gym & Home Workouts is published by Samay Vashsht, 2026.
         </Text>
         <Text style={styles.heading}>Exercise illustrations</Text>
         <Text style={styles.body}>
