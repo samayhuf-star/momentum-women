@@ -1,18 +1,20 @@
 export const BUNDLE_ID = 'com.samayvashsht.momentumwomen';
 
 export const PRODUCT_IDS = {
+  weekly: `${BUNDLE_ID}.weekly`,
   monthly: `${BUNDLE_ID}.monthly`,
   yearly: `${BUNDLE_ID}.yearly`,
   lifetime: `${BUNDLE_ID}.lifetime`,
 } as const;
 
 export const PRODUCT_CATALOG = [
-  { id: PRODUCT_IDS.yearly, kind: 'yearly' as const, type: 'subs' as const, label: 'Yearly', period: 'year' as const },
+  { id: PRODUCT_IDS.weekly, kind: 'weekly' as const, type: 'subs' as const, label: 'Weekly', period: 'week' as const },
   { id: PRODUCT_IDS.monthly, kind: 'monthly' as const, type: 'subs' as const, label: 'Monthly', period: 'month' as const },
+  { id: PRODUCT_IDS.yearly, kind: 'yearly' as const, type: 'subs' as const, label: 'Annual', period: 'year' as const },
   { id: PRODUCT_IDS.lifetime, kind: 'lifetime' as const, type: 'in-app' as const, label: 'Lifetime', period: null },
 ];
 
-export const SUB_PRODUCT_IDS = [PRODUCT_IDS.yearly, PRODUCT_IDS.monthly];
+export const SUB_PRODUCT_IDS = [PRODUCT_IDS.weekly, PRODUCT_IDS.monthly, PRODUCT_IDS.yearly];
 export const IAP_PRODUCT_IDS = [PRODUCT_IDS.lifetime];
 export const ALL_PRODUCT_IDS: string[] = PRODUCT_CATALOG.map((p) => p.id);
 export const isKnownProduct = (id: string | null | undefined) => !!id && ALL_PRODUCT_IDS.includes(id);

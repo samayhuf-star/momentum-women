@@ -26,6 +26,7 @@ export default function RootLayout() {
                   animation: 'slide_from_right',
                 }}
               >
+                <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
                 <Stack.Screen name="login" />
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="workout/[id]" options={{ presentation: 'modal' }} />

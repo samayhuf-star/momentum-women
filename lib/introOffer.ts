@@ -36,15 +36,20 @@ export function freeTrialDays(p: ProductLike | null | undefined): number | null 
 
 export type PlanText = {
   price: string;
-  period?: 'month' | 'year' | null;
-  kind: 'monthly' | 'yearly' | 'lifetime';
+  period?: 'week' | 'month' | 'year' | null;
+  kind: 'weekly' | 'monthly' | 'yearly' | 'lifetime';
   trialDays?: number | null;
 };
+
+const KIND_PERIOD = { weekly: 'week', monthly: 'month', yearly: 'year' } as const;
+function periodOf(plan: PlanText): string {
+  return plan.period ?? (plan.kind === 'lifetime' ? '' : KIND_PERIOD[plan.kind]);
+}
 
 /** Trial wording shows only when the store reports an eligible free trial. Lifetime never shows a trial. */
 export function planLine(plan: PlanText): string {
   if (plan.kind === 'lifetime') return `${plan.price} one-time, no subscription`;
-  const period = plan.period ?? (plan.kind === 'yearly' ? 'year' : 'month');
+  const period = periodOf(plan);
   if (plan.trialDays && plan.trialDays > 0) {
     return `${plan.trialDays} days free, then ${plan.price}/${period}, cancel anytime`;
   }
@@ -54,8 +59,7 @@ export function planLine(plan: PlanText): string {
 export function ctaText(plan: PlanText): string {
   if (plan.kind === 'lifetime') return `Continue for ${plan.price}`;
   if (plan.trialDays && plan.trialDays > 0) {
-    const period = plan.period ?? (plan.kind === 'yearly' ? 'year' : 'month');
-    return `7 days free, then ${plan.price}/${period}`;
+    return `${plan.trialDays} days free, then ${plan.price}/${periodOf(plan)}`;
   }
   return `Subscribe for ${plan.price}`;
 }
